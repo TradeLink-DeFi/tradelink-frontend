@@ -33,7 +33,7 @@ const config: Config = {
           colors: {
             background: "#FFF",
             primary: {
-              DEFAULT: "#1263F1"
+              DEFAULT: "#1263F1",
             },
             danger: "#F6465D"
           },

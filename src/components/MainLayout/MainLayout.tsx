@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { isTokenExpired } from "@/services/expired.service";
 import useUserStore from "@/stores/userStore";
 import { useDisclosure } from "@nextui-org/react";
+import Navbar from "./Navbar";
 
 export default function MainLayout({
   children,
@@ -27,6 +28,7 @@ export default function MainLayout({
 
   return (
     <div>
+      <Navbar />
       <main className="flex min-h-[88vh] flex-col items-center justify-center px-1 pt-5 md:px-12 lg:pb-24 lg:px-24">
         {children}
       </main>
