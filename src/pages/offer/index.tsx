@@ -12,10 +12,12 @@ export default function OfferPage() {
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
         />
       </Head>
+
       <div className="w-full">
         <p className="text-xl font-semibold text-left">Create Offer</p>
       </div>
-      <DndTrader></DndTrader>
+
+      <DndTrader />
     </MainLayout>
   );
 }

@@ -7,4 +7,8 @@ export const NAV_MENU = [
     name: "Trade",
     path: "/trade",
   },
+  {
+    name: "Offer",
+    path: "/offer",
+  },
 ];

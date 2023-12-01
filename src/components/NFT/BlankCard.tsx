@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { Image } from "@nextui-org/react";
-import { NftMetaData } from "@/interfaces/nft.interface";
 
 export const BlankCard = () => {
   return (
-    <div className="rounded-lg">
-      <div className="relative rounded-lg">
+    <div className="">
+      <div className="relative">
         <Image
           draggable={false}
-          className="rounded-lg relative"
+          className="rounded-md relative border-2 border-gray-300"
           width={200}
           height={200}
           src="./gray.svg"
