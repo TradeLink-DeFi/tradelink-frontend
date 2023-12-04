@@ -14,14 +14,15 @@ export default function AuthProvider({
 }) {
   const [mounted, setMounted] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
+  const [isGetting, setIsGetting] = useState(false);
   const { address } = useAccount();
-  const router = useRouter();
-  const { user, accessToken, authenticate, login, logout } =
-    useUserStore();
+  const { user, accessToken, authenticate, login, logout } = useUserStore();
 
   const handleLogin = useCallback(async () => {
     try {
+      setIsGetting(true);
       const { message } = (await authService.getChallengeMessage()).data;
+      setIsGetting(false);
       setIsSigning(true);
       const signature = await signMessage({
         message,
@@ -32,26 +33,21 @@ export default function AuthProvider({
       setIsSigning(false);
       const { accessToken: token } = (await authService.login(signature!)).data;
       login(token);
-      router.push("/");
     } catch (e) {
       console.error(e);
       logout();
     }
-  }, [router, login, logout]);
-
-  // Redirect to login if not logged in
-  useEffect(() => {
-    if (!address && router.pathname !== "/login") {
-      router.push("/login");
-    }
-  }, [address, router]);
+  }, [login, logout]);
 
   // Redirect to home if logged in
   useEffect(() => {
-    if (address && router.pathname === "/login") {
+    if (
+      address &&
+      user.walletAddress.toLowerCase() !== address?.toLowerCase()
+    ) {
       handleLogin();
     }
-  }, [address, router, handleLogin]);
+  }, [address, handleLogin, user]);
 
   // Authenticate if logged in
   useEffect(() => {
@@ -75,13 +71,7 @@ export default function AuthProvider({
     setMounted(true);
   }, []);
 
-  // handle loading on page load
-  if (
-    !mounted ||
-    (router.pathname === "/" &&
-    user.walletAddress.toLowerCase() !== address?.toLowerCase()) ||
-    isSigning
-  ) {
+  if (!mounted || isSigning || isGetting) {
     return (
       <div className="h-screen w-full flex flex-col justify-center items-center">
         <Spinner size="lg" />

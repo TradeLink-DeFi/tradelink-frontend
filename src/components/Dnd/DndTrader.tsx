@@ -29,6 +29,7 @@ import { ChevronIcon } from "@/constants/ChavronIcon";
 interface Cards {
   id: number;
   title: string;
+  icon: string;
   components: {
     id: number;
     name: string;
@@ -67,22 +68,28 @@ const chains = [
   },
 ];
 
-const DndTrader = () => {
+interface DndProps {
+  isCreateOffer: boolean;
+}
+
+const DndTrader = (dndProps: DndProps) => {
   const myElementRef = useRef<HTMLDivElement>(null);
 
-  const [myElementHeight, setMyElementHeight] = useState(0);
-  const [myElementWidth, setMyElementWidth] = useState(0);
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
   const [data, setData] = useState<Cards[] | []>([]);
 
+  const MAX_LINES = 5;
+  const MAX_LENGTH = 200;
+
+  useEffect(() => {
+    setData(itemsData);
+  }, []);
+
   const onDragEnd = (result: DropResult) => {
-    console.log("result", result);
     const { source, destination } = result;
     if (!destination) return;
-    console.log("source.droppableId", source.droppableId);
-    console.log("destination.droppableId", destination.droppableId);
     if (source.droppableId !== destination.droppableId) {
       const newData = [...JSON.parse(JSON.stringify(data))];
       const oldDroppableIndex = newData.findIndex(
@@ -108,10 +115,6 @@ const DndTrader = () => {
     }
   };
 
-  useEffect(() => {
-    setData(itemsData);
-  }, []);
-
   const mockNft: NftMetaData = {
     description: "This is mock nft",
     external_url: "",
@@ -121,9 +124,6 @@ const DndTrader = () => {
     attributes: [],
   };
 
-  const MAX_LINES = 5;
-  const MAX_LENGTH = 200;
-
   const handleInputChange = (event: any) => {
     const lines = event.target.value.split("\n");
     if (lines.length > MAX_LINES) {
@@ -132,14 +132,6 @@ const DndTrader = () => {
     const inputValueLimited = event.target.value.slice(0, MAX_LENGTH);
     setInputValue(inputValueLimited);
   };
-
-  useEffect(() => {
-    if (myElementRef.current) {
-      setMyElementHeight(myElementRef.current.offsetHeight);
-      setMyElementWidth(myElementRef.current.offsetWidth);
-      console.log("high::", myElementRef.current.offsetHeight);
-    }
-  }, [myElementRef]);
 
   const MyItemDropableBg = () => (
     <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 -z-10`)}>
@@ -304,7 +296,7 @@ const DndTrader = () => {
                       trigger: ["border border-gray-300", "bg-white"],
                     }}
                   >
-                    {collections.map((collection) => (
+                    {collections.map((collection, index) => (
                       <SelectItem
                         key={collection.value}
                         value={collection.value}
@@ -318,7 +310,11 @@ const DndTrader = () => {
                     size="sm"
                     defaultSelectedKeys={[chains[0].value]}
                     startContent={
-                      <Avatar className="w-12" size="sm" src="/polygon.jpeg" />
+                      <Avatar
+                        className="w-12"
+                        size="sm"
+                        src="/images/polygon.jpeg"
+                      />
                     }
                     disallowEmptySelection
                     classNames={{
@@ -326,11 +322,13 @@ const DndTrader = () => {
                       trigger: ["border border-gray-300", "bg-white"],
                     }}
                   >
-                    {chains.map((chain) => (
+                    {chains.map((chain, index) => (
                       <SelectItem
                         key={chain.value}
                         value={chain.value}
-                        startContent={<Avatar size="sm" src="/polygon.jpeg" />}
+                        startContent={
+                          <Avatar size="sm" src="/images/polygon.jpeg" />
+                        }
                       >
                         {chain.value}
                       </SelectItem>
@@ -354,12 +352,13 @@ const DndTrader = () => {
                         >
                           {data[0]?.components?.map((component, index) => (
                             <Draggable
-                              key={index}
+                              key={component.id}
                               draggableId={component.id.toString()}
                               index={index}
                             >
                               {(provided) => (
                                 <div
+                                  key={component.id}
                                   {...provided.dragHandleProps}
                                   {...provided.draggableProps}
                                   ref={provided.innerRef}
@@ -411,9 +410,17 @@ const DndTrader = () => {
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                         >
-                          <h2 className="text-left font-bold mb-6 text-black">
-                            {val.title}
-                          </h2>
+                          <div className="flex flex-row gap-2">
+                            <Image
+                              src={val.icon}
+                              alt={val.title}
+                              width={20}
+                              height={20}
+                            />
+                            <h2 className="text-left font-bold mb-6 text-black">
+                              {val.title}
+                            </h2>
+                          </div>
 
                           {DropableBg()}
 
@@ -428,6 +435,7 @@ const DndTrader = () => {
                                 >
                                   {(provided) => (
                                     <div
+                                      key={component.id}
                                       {...provided.dragHandleProps}
                                       {...provided.draggableProps}
                                       ref={provided.innerRef}
@@ -455,43 +463,49 @@ const DndTrader = () => {
         </div>
       </DndContext>
 
-      <div className="w-full pl-4">
-        <p className="pl-1 pb-2 text-sm text-gray-400 font-light">Note</p>
-        <Textarea
-          onChange={handleInputChange}
-          value={inputValue}
-          aria-label="note"
-          endContent={
-            <div>
-              <p className="text-[10px] text-gray-300">{`${inputValue.length}/${MAX_LENGTH}`}</p>
+      {
+        // Create offer section
+        dndProps.isCreateOffer && (
+          <>
+            <div className="w-full pl-4">
+              <p className="pl-1 pb-2 text-sm text-gray-400 font-light">Note</p>
+              <Textarea
+                onChange={handleInputChange}
+                value={inputValue}
+                aria-label="note"
+                endContent={
+                  <div>
+                    <p className="text-[10px] text-gray-300">{`${inputValue.length}/${MAX_LENGTH}`}</p>
+                  </div>
+                }
+                classNames={{
+                  input: [
+                    "bg-transparent",
+                    "text-black/90",
+                    "placeholder:text-default-700/50",
+                  ],
+                  inputWrapper: [
+                    "border border-gray-200",
+                    "bg-white",
+                    "placeHolder: text-gray-400",
+                    "hover:bg-white",
+                    "group-data-[focused=true]:bg-white",
+                  ],
+                }}
+                placeholder="Write something ..."
+              />
             </div>
-          }
-          classNames={{
-            input: [
-              "bg-transparent",
-              "text-black/90",
-              "placeholder:text-default-700/50",
-            ],
-            inputWrapper: [
-              "border border-gray-200",
-              "bg-white",
-              "placeHolder: text-gray-400",
-              "hover:bg-white",
-              "group-data-[focused=true]:bg-white",
-            ],
-          }}
-          placeholder="Write something ..."
-        />
-      </div>
-
-      <div className="w-full mt-8 flex flex-row justify-end gap-4">
-        <Button className="w-1/12 bg-white text-primary border border-primary">
-          Cancel
-        </Button>
-        <Button className="w-1/12 bg-primary text-white border border-primary">
-          Create
-        </Button>
-      </div>
+            <div className="w-full mt-8 flex flex-row justify-end gap-4">
+              <Button className="w-1/12 bg-white text-primary border border-primary">
+                Cancel
+              </Button>
+              <Button className="w-1/12 bg-primary text-white border border-primary">
+                Create
+              </Button>
+            </div>
+          </>
+        )
+      }
     </>
   );
 };
