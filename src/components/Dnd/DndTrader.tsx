@@ -78,11 +78,11 @@ const DndTrader = () => {
   const [data, setData] = useState<Cards[] | []>([]);
 
   const onDragEnd = (result: DropResult) => {
-    console.log("result", result);
+    // console.log("result", result);
     const { source, destination } = result;
     if (!destination) return;
-    console.log("source.droppableId", source.droppableId);
-    console.log("destination.droppableId", destination.droppableId);
+    // console.log("source.droppableId", source.droppableId);
+    // console.log("destination.droppableId", destination.droppableId);
     if (source.droppableId !== destination.droppableId) {
       const newData = [...JSON.parse(JSON.stringify(data))];
       const oldDroppableIndex = newData.findIndex(
@@ -137,7 +137,6 @@ const DndTrader = () => {
     if (myElementRef.current) {
       setMyElementHeight(myElementRef.current.offsetHeight);
       setMyElementWidth(myElementRef.current.offsetWidth);
-      console.log("high::", myElementRef.current.offsetHeight);
     }
   }, [myElementRef]);
 
