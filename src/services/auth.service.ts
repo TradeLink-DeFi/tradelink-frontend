@@ -9,7 +9,12 @@ const login = (signature: string) => {
 };
 
 const me = async (): Promise<any> => {
-  return axios.get("/user/me");
+  return axios
+    .get("/user/me")
+    .then((res) => res)
+    .catch((error) => {
+      console.log("error", error);
+    });
 };
 
 const authService = {

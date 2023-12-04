@@ -36,7 +36,7 @@ export const NftCard = ({
         />
         <Avatar
           className="absolute z-20 top-2 left-2 w-[15px] h-[15px] opacity-80"
-          src={"/polygon.jpeg"}
+          src={"/images/polygon.jpeg"}
         />
         {isHovered && (
           <div className="z-10 absolute h-2/5 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-black bg-opacity-40 rounded-lg">

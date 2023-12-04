@@ -3,9 +3,10 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import { bkcTestnet } from "@/constants/bkcTestnet";
+import { goerli, sepolia, polygonMumbai } from "wagmi/chains";
 
 const { chains, publicClient } = configureChains(
-  [bkcTestnet],
+  [goerli, sepolia, polygonMumbai],
   [publicProvider()]
 );
 

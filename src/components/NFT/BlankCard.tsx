@@ -10,7 +10,7 @@ export const BlankCard = () => {
           className="rounded-md relative border-2 border-gray-300"
           width={200}
           height={200}
-          src="./gray.svg"
+          src="./images/gray.svg"
           alt=""
         />
       </div>
