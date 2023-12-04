@@ -32,15 +32,15 @@ export const itemsData = [
                 name: "Knife 03"
             },
             {
-                id: 888,
+                id: 101,
                 name: "Knife 04"
             },
             {
-                id: 999,
+                id: 102,
                 name: "Knife 03"
             },
             {
-                id: 1000,
+                id: 103,
                 name: "Knife 04"
             },
         ]

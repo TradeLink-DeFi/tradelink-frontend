@@ -70,8 +70,6 @@ const chains = [
 const DndTrader = () => {
   const myElementRef = useRef<HTMLDivElement>(null);
 
-  const [myElementHeight, setMyElementHeight] = useState(0);
-  const [myElementWidth, setMyElementWidth] = useState(0);
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
@@ -132,13 +130,6 @@ const DndTrader = () => {
     const inputValueLimited = event.target.value.slice(0, MAX_LENGTH);
     setInputValue(inputValueLimited);
   };
-
-  useEffect(() => {
-    if (myElementRef.current) {
-      setMyElementHeight(myElementRef.current.offsetHeight);
-      setMyElementWidth(myElementRef.current.offsetWidth);
-    }
-  }, [myElementRef]);
 
   const MyItemDropableBg = () => (
     <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 -z-10`)}>
@@ -303,7 +294,7 @@ const DndTrader = () => {
                       trigger: ["border border-gray-300", "bg-white"],
                     }}
                   >
-                    {collections.map((collection) => (
+                    {collections.map((collection, index) => (
                       <SelectItem
                         key={collection.value}
                         value={collection.value}
@@ -317,7 +308,11 @@ const DndTrader = () => {
                     size="sm"
                     defaultSelectedKeys={[chains[0].value]}
                     startContent={
-                      <Avatar className="w-12" size="sm" src="/polygon.jpeg" />
+                      <Avatar
+                        className="w-12"
+                        size="sm"
+                        src="/images/polygon.jpeg"
+                      />
                     }
                     disallowEmptySelection
                     classNames={{
@@ -325,11 +320,13 @@ const DndTrader = () => {
                       trigger: ["border border-gray-300", "bg-white"],
                     }}
                   >
-                    {chains.map((chain) => (
+                    {chains.map((chain, index) => (
                       <SelectItem
                         key={chain.value}
                         value={chain.value}
-                        startContent={<Avatar size="sm" src="/polygon.jpeg" />}
+                        startContent={
+                          <Avatar size="sm" src="/images/polygon.jpeg" />
+                        }
                       >
                         {chain.value}
                       </SelectItem>
@@ -353,12 +350,13 @@ const DndTrader = () => {
                         >
                           {data[0]?.components?.map((component, index) => (
                             <Draggable
-                              key={index}
+                              key={component.id}
                               draggableId={component.id.toString()}
                               index={index}
                             >
                               {(provided) => (
                                 <div
+                                  key={component.id}
                                   {...provided.dragHandleProps}
                                   {...provided.draggableProps}
                                   ref={provided.innerRef}
@@ -427,6 +425,7 @@ const DndTrader = () => {
                                 >
                                   {(provided) => (
                                     <div
+                                      key={component.id}
                                       {...provided.dragHandleProps}
                                       {...provided.draggableProps}
                                       ref={provided.innerRef}
