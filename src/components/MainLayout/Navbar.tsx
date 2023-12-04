@@ -12,7 +12,7 @@ export default function Navbar() {
         <div className="h-[72px] px-[10px] sm:px-[24px] flex flex-row justify-between items-center bg-white border-solid border-b-1 border-[##EFEFEF]">
           <Image
             alt="trans-logo"
-            src="/logo.svg"
+            src="/images/logo.svg"
             width="142px"
             height="32px"
             className="cursor-pointer rounded-none ml-16"
