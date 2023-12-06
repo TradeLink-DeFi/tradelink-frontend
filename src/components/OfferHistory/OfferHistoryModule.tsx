@@ -10,7 +10,7 @@ export default function OfferHistoryModule() {
     setIsFilterOfferProcessing(filter);
   };
   return (
-    <div className="bg-white rounded-lg min-h-full py-4 px-6 space-y-3">
+    <div className="bg-white rounded-lg min-h-screen py-4 px-6 space-y-3">
       <h2 className="font-semibold text-xl">History</h2>
       <div className="flex space-x-2">
         <Button

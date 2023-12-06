@@ -1,37 +1,63 @@
 // button, filter bar (search, select[nft collection, chain])
 
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
+import {
+  Button,
+  Input,
+  Select,
+  SelectItem,
+  Image,
+  Avatar,
+} from "@nextui-org/react";
 import { Plus, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import OfferPost from "./OfferPost";
+import { getChains } from "@/services/chain.service";
+import { getNftCollection } from "@/services/nftCollection.service";
+import { getOffers } from "@/services/offer.service";
+import { OfferResponse } from "@/interfaces/offer.interface";
 
 // offer post list
 export default function OfferPostModule() {
   const [isDisabledCreate, setIsDisabledCreate] = useState(false);
+  const [chainFilterList, setChainFilterList] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [nftCollectionFilterList, setNftCollectioFilterList] = useState<
+    {
+      label: string;
+      value: string;
+    }[]
+  >([]);
+  const [offerPosts, setOfferPosts] = useState<OfferResponse[]>();
 
-  const mockNftCollections = [
-    {
-      label: "A",
-      value: "a",
-    },
-    {
-      label: "B",
-      value: "b",
-    },
-  ];
+  const getChainFilterList = async () => {
+    const chains = await getChains();
+    return chains?.map((chain) => ({
+      label: chain.chainName,
+      value: chain.chainId,
+    }));
+  };
 
-  const mockChains = [
-    {
-      label: "A",
-      value: "a",
-    },
-    {
-      label: "B",
-      value: "b",
-    },
-  ];
+  const getNftCollectionFilterList = async () => {
+    const nftCollections = await getNftCollection();
+    console.log("n", nftCollections);
+    return nftCollections?.map((nftCollection) => ({
+      label: nftCollection.name,
+      value: nftCollection._id,
+    }));
+  };
 
-  const offerPosts = [1, 2];
+  useEffect(() => {
+    getChainFilterList().then((chain) => chain && setChainFilterList(chain));
+    getNftCollectionFilterList().then(
+      (nftCollection) =>
+        nftCollection && setNftCollectioFilterList(nftCollection)
+    );
+    getOffers().then((offers) => offers && setOfferPosts(offers));
+  }, []);
 
   return (
     <div className="space-y-3">
@@ -57,7 +83,7 @@ export default function OfferPostModule() {
             inputWrapper: ["border", "bg-white"],
           }}
         />
-        <div className="flex space-x-3">
+        <div className="flex space-x-2">
           <Select
             size="sm"
             placeholder="Select Collection NFT"
@@ -67,8 +93,9 @@ export default function OfferPostModule() {
               label: "font-semibold text-sm text-[#000211]",
               trigger: ["border", "bg-white"],
             }}
+            label=""
           >
-            {mockNftCollections.map((nftCollection) => (
+            {nftCollectionFilterList.map((nftCollection) => (
               <SelectItem key={nftCollection.value} value={nftCollection.value}>
                 {nftCollection.label}
               </SelectItem>
@@ -77,25 +104,41 @@ export default function OfferPostModule() {
           <div>
             <Select
               size="sm"
-              placeholder="C"
-              className="w-16"
+              items={chainFilterList}
               variant="bordered"
               classNames={{
+                base: "w-24",
                 label: ["font-semibold", "text-sm", "text-[#000211]"],
                 trigger: ["border", "bg-white"],
               }}
+              defaultSelectedKeys={["11155111"]}
+              placeholder="chain"
+              renderValue={(items) => {
+                return items.map((item) => (
+                  <Avatar
+                    src={`/chains/${item.data?.label}.png`}
+                    alt={item.data?.label}
+                    size="sm"
+                    key={item.key}
+                  />
+                ));
+              }}
             >
-              {mockChains.map((chain) => (
+              {(chain) => (
                 <SelectItem key={chain.value} value={chain.value}>
-                  {chain.label}
+                  <Image
+                    src={`/chains/${chain.label}.png`}
+                    alt={chain.label}
+                    width={30}
+                    height={30}
+                  />
                 </SelectItem>
-              ))}
+              )}
             </Select>
           </div>
         </div>
       </div>
-      {/* content */}
-      {offerPosts.map((offerPost, key) => {
+      {offerPosts?.map((offerPost, key) => {
         return <OfferPost key={key} />;
       })}
     </div>

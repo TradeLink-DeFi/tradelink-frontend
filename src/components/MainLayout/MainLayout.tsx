@@ -27,7 +27,7 @@ export default function MainLayout({
   }, []);
 
   return (
-    <div className="bg-[#F6F6F7] h-screen">
+    <div className="bg-[#F6F6F7] h-full">
       <Navbar />
       <main className="flex min-h-[88vh] flex-col items-center px-1 pt-5 md:px-12 lg:pb-24 lg:px-24">
         {children}
