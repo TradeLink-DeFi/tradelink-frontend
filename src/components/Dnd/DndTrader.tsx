@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { myItems } from "@/constants/mockMyItem";
+import { itemsData } from "@/constants/mockDndData";
 import { useEffect, useRef, useState } from "react";
 import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
 import { DndContext } from "@/contexts/DndContext";
 import { NftCard } from "../NFT/NftCard";
+import { NftMetaData } from "@/interfaces/nft.interface";
 import { BlankCard } from "../NFT/BlankCard";
 import { cn } from "../../../lib/utils";
 import {
@@ -22,10 +23,18 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { Search, ChevronLeft } from "lucide-react";
+import { MicroNftCard } from "../NFT/MicroNftCard";
 import { ChevronIcon } from "@/constants/ChavronIcon";
-import { OfferCard } from "../NFT/OfferCard";
-import { DndItem, Item } from "@/interfaces/item.interface";
-import { TokenCard } from "../NFT/TokenCard";
+
+interface Cards {
+  id: number;
+  title: string;
+  icon: string;
+  components: {
+    id: number;
+    name: string;
+  }[];
+}
 
 enum ChooseType {
   MyItems,
@@ -59,61 +68,6 @@ const chains = [
   },
 ];
 
-const mockupOfferItemData = [
-  {
-    id: 2,
-    name: "NFT AR Gun",
-    tokenId: "2",
-    contractAddress: "0xCe5E904550ae8850813F98bA5A110ac20276770f",
-    chainId: "5",
-    isNft: true,
-    metaData: {
-      description: "Meta data description",
-      external_url: "",
-      image: "https://th.bing.com/th/id/OIG.bVV.VVoCj8sw2BGl73vG?pid=ImgGn", // Gun 2
-      name: "AR 2",
-      attributes: [],
-    },
-  },
-  {
-    id: 3,
-    name: "NFT Knife",
-    tokenId: "1",
-    contractAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    chainId: "5",
-    isNft: true,
-    metaData: {
-      description: "Meta data description",
-      external_url: "",
-      image:
-        "https://th.bing.com/th/id/OIG.rt01.E7.L3SZmywZ5pv7?w=1024&h=1024&rs=1&pid=ImgDetMain", // Knife
-      name: "Knift 1",
-      attributes: [],
-    },
-  },
-];
-
-const initialDnd = [
-  {
-    id: 0,
-    title: "My Items",
-    icon: "/vectors/greenThump.svg",
-    components: myItems,
-  },
-  {
-    id: 1,
-    title: "Offers you want",
-    icon: "/vectors/greenThump.svg",
-    components: [],
-  },
-  {
-    id: 2,
-    title: "Your trade offer",
-    icon: "/vectors/blueLike.svg",
-    components: [],
-  },
-];
-
 interface DndProps {
   isCreateOffer: boolean;
 }
@@ -124,26 +78,18 @@ const DndTrader = (dndProps: DndProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
-  const [data, setData] = useState<DndItem[] | []>([]);
-  const [offerItem, setOfferItem] =
-    useState<Array<Item | null>>(mockupOfferItemData);
-  const [droppableBg, setDroppableBg] = useState<Array<Item | null>>();
+  const [data, setData] = useState<Cards[] | []>([]);
 
   const MAX_LINES = 5;
   const MAX_LENGTH = 200;
 
   useEffect(() => {
-    setData(initialDnd);
+    setData(itemsData);
   }, []);
-
-  const handleChangeItemType = (type: ItemType) => {
-    setItemType(type);
-  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
-    // # drag to other droppable
     if (source.droppableId !== destination.droppableId) {
       const newData = [...JSON.parse(JSON.stringify(data))];
       const oldDroppableIndex = newData.findIndex(
@@ -159,7 +105,6 @@ const DndTrader = (dndProps: DndProps) => {
       newData[newDroppableIndex].components.splice(destination.index, 0, item);
       setData([...newData]);
     } else {
-      // # drag in same droppable
       const newData = [...JSON.parse(JSON.stringify(data))];
       const droppableIndex = newData.findIndex(
         (x) => x.id == source.droppableId.split("droppable-")[1]
@@ -170,38 +115,14 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
-  const handleDroppableBg = () => {
-    let offerArray = [...offerItem];
-    const droppableItem = data[2]?.components || [];
-    let result: (Item | null)[] = Array(droppableItem?.length).fill(null);
-    if (droppableItem?.length > 0) {
-      droppableItem?.forEach(async (item, index) => {
-        const offerItemIndex = offerItem.findIndex(
-          (offer) =>
-            offer &&
-            offer.tokenId == item.tokenId &&
-            offer.contractAddress == item.contractAddress
-        );
-        if (offerItemIndex !== -1) {
-          result[index] = offerArray[offerItemIndex];
-        }
-      });
-      offerArray.forEach((item) => {
-        if (!result.includes(item)) {
-          result.push(item);
-        }
-      });
-      setDroppableBg(result);
-    } else {
-      setDroppableBg(offerItem);
-    }
+  const mockNft: NftMetaData = {
+    description: "This is mock nft",
+    external_url: "",
+    image:
+      "https://th.bing.com/th/id/OIG.ikef0T2SW.9nnZUF.E8j?w=1024&h=1024&rs=1&pid=ImgDetMain",
+    name: "Mock NFT",
+    attributes: [],
   };
-
-  useEffect(() => {
-    if (data) {
-      handleDroppableBg();
-    }
-  }, [data]);
 
   const handleInputChange = (event: any) => {
     const lines = event.target.value.split("\n");
@@ -219,36 +140,13 @@ const DndTrader = (dndProps: DndProps) => {
       ))}
     </div>
   );
-
-  const DropableBg = (isMyOffer: boolean) => {
-    if (!dndProps.isCreateOffer && isMyOffer) {
-      return (
-        <div className={cn(`absolute pr-[20px] grid grid-cols-5 gap-2 z-0`)}>
-          {Array.from({ length: 10 }).map((_, index) => {
-            if (droppableBg && droppableBg[index]) {
-              return (
-                <OfferCard
-                  key={index}
-                  nftItem={droppableBg![index]}
-                  chain={""}
-                />
-              );
-            } else {
-              return <BlankCard key={index} />;
-            }
-          })}
-        </div>
-      );
-    } else {
-      return (
-        <div className={cn(`absolute pr-[20px] grid grid-cols-5 gap-2 z-0`)}>
-          {Array.from({ length: 10 }).map((_, index) => (
-            <BlankCard key={index} />
-          ))}
-        </div>
-      );
-    }
-  };
+  const DropableBg = () => (
+    <div className={cn(`absolute pr-[20px] grid grid-cols-5 gap-2 z-0`)}>
+      {Array.from({ length: 10 }).map((_, index) => (
+        <BlankCard key={index} />
+      ))}
+    </div>
+  );
 
   const renderItem = ({
     ref,
@@ -349,7 +247,7 @@ const DndTrader = (dndProps: DndProps) => {
                 <div className="flex gap-2 pl-4 items-center font-semibold">
                   <p className=" text-sm">Select Type</p>
                   <p
-                    onClick={() => handleChangeItemType(ItemType.NFTs)}
+                    onClick={() => setItemType(ItemType.NFTs)}
                     className={cn(
                       "rounded-full text-sm px-5 py-1 bg-primary-50 hover:cursor-pointer",
                       itemType == ItemType.NFTs && "text-white bg-primary"
@@ -358,7 +256,7 @@ const DndTrader = (dndProps: DndProps) => {
                     NFTs
                   </p>
                   <p
-                    onClick={() => handleChangeItemType(ItemType.Tokens)}
+                    onClick={() => setItemType(ItemType.Tokens)}
                     className={cn(
                       "rounded-full text-sm px-5 py-1 bg-primary-50 hover:cursor-pointer",
                       itemType == ItemType.Tokens && "text-white bg-primary"
@@ -465,11 +363,7 @@ const DndTrader = (dndProps: DndProps) => {
                                   {...provided.draggableProps}
                                   ref={provided.innerRef}
                                 >
-                                  <NftCard
-                                    nftItem={component}
-                                    chain={"polygon"}
-                                    isMicro={false}
-                                  />
+                                  <NftCard nft={mockNft} chain={"polygon"} />
                                 </div>
                               )}
                             </Draggable>
@@ -528,7 +422,7 @@ const DndTrader = (dndProps: DndProps) => {
                             </h2>
                           </div>
 
-                          {DropableBg(val.id == 2)}
+                          {DropableBg()}
 
                           {
                             <div className="grid grid-cols-5 gap-2">
@@ -546,9 +440,8 @@ const DndTrader = (dndProps: DndProps) => {
                                       {...provided.draggableProps}
                                       ref={provided.innerRef}
                                     >
-                                      <NftCard
-                                        isMicro={true}
-                                        nftItem={component}
+                                      <MicroNftCard
+                                        nft={mockNft}
                                         chain={"polygon"}
                                       />
                                     </div>

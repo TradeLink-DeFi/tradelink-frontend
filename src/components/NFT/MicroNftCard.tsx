@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Avatar, Image } from "@nextui-org/react";
 import { NftMetaData } from "@/interfaces/nft.interface";
-import { Item } from "@/interfaces/item.interface";
 
-export const OfferCard = ({
-  nftItem,
+export const MicroNftCard = ({
+  nft,
   chain,
 }: {
-  nftItem: Item | null;
+  nft: NftMetaData;
   chain: string;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -21,7 +20,7 @@ export const OfferCard = ({
   };
 
   return (
-    <div className="rounded-lg opacity-30">
+    <div className="rounded-lg">
       <div
         className="relative rounded-lg"
         onMouseEnter={handleMouseEnter}
@@ -31,8 +30,8 @@ export const OfferCard = ({
           className="rounded-lg relative"
           width={200}
           height={200}
-          src={nftItem?.metaData?.image}
-          alt={nftItem?.metaData?.name}
+          src={nft.image}
+          alt=""
           draggable={false}
         />
         <Avatar
@@ -40,9 +39,10 @@ export const OfferCard = ({
           src={"/images/polygon.jpeg"}
         />
         {isHovered && (
-          <div className="z-10 absolute h-1/4 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-black bg-opacity-80 rounded-b-lg">
-            <div className="flex flex-col items-center w-full">
-              <p className="text-white text-xs font-light">{`#${nftItem?.tokenId}`}</p>
+          <div className="z-10 absolute h-2/5 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-black bg-opacity-40 rounded-lg">
+            <div className="flex flex-col items-start truncate">
+              <p className="text-white text-[10px]">{"Weapon Scifi"}</p>
+              <p className="text-gray-400 text-[8px]">{"#123456"}</p>
             </div>
           </div>
         )}
