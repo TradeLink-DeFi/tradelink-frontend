@@ -13,7 +13,7 @@ export default function Trade() {
                 <p className='text-xl font-semibold text-left'>Create Offer</p>
             </div>
 
-            <DndTrader></DndTrader>
+            <DndTrader isCreateOffer={false}></DndTrader>
         </MainLayout>
     )
 }
