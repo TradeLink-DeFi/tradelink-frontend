@@ -1,13 +1,16 @@
 import React, { useState } from "react";
 import { Avatar, Image } from "@nextui-org/react";
-import { NftMetaData } from "@/interfaces/nft.interface";
+import { Item } from "@/interfaces/item.interface";
+import { cn } from "../../../lib/utils";
 
 export const NftCard = ({
-  nft,
+  nftItem,
   chain,
+  isMicro,
 }: {
-  nft: NftMetaData;
+  nftItem: Item | null;
   chain: string;
+  isMicro: boolean;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -30,7 +33,7 @@ export const NftCard = ({
           className="rounded-lg relative"
           width={200}
           height={200}
-          src={nft.image}
+          src={nftItem?.metaData?.image}
           alt=""
           draggable={false}
         />
@@ -39,12 +42,12 @@ export const NftCard = ({
           src={"/images/polygon.jpeg"}
         />
         {isHovered && (
-          <div className="z-10 absolute h-2/5 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-black bg-opacity-40 rounded-lg">
-            <div className="flex flex-col items-start truncate">
-              <p className="text-white text-xs font-semibold">
-                {"Weapon Scifi"}
-              </p>
-              <p className="text-gray-400 text-xs">{"#123456"}</p>
+          <div className="z-10 absolute h-1/4 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-white bg-opacity-40 rounded-b-lg">
+            <div className="flex flex-col items-center w-full">
+              <p className={cn(
+                "text-white font-light",
+                isMicro && "text-xs"
+              )}>{`#${nftItem?.tokenId}`}</p>
             </div>
           </div>
         )}
