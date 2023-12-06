@@ -17,7 +17,7 @@ export default function OfferPage() {
         <p className="text-xl font-semibold text-left">Create Offer</p>
       </div>
 
-      <DndTrader isCreateOffer={false} />
+      <DndTrader isCreateOffer={true} />
     </MainLayout>
   );
 }

@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
 import { DndContext } from "@/contexts/DndContext";
 import { NftCard } from "../NFT/NftCard";
-import { NftMetaData } from "@/interfaces/nft.interface";
 import { BlankCard } from "../NFT/BlankCard";
 import { cn } from "../../../lib/utils";
 import {
@@ -23,29 +22,10 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { Search, ChevronLeft } from "lucide-react";
-import { MicroNftCard } from "../NFT/MicroNftCard";
 import { ChevronIcon } from "@/constants/ChavronIcon";
 import { OfferCard } from "../NFT/OfferCard";
-import { Item } from "@/interfaces/item.interface";
-
-interface Cards {
-  id: number;
-  title: string;
-  icon: string;
-  components: {
-    id: number;
-    name: string;
-    token: string;
-    contractAddress: string;
-    metaData: {
-      description: string;
-      external_url: string;
-      image: string;
-      name: string;
-      attributes: Array<any>;
-    };
-  }[];
-}
+import { DndItem, Item } from "@/interfaces/item.interface";
+import { TokenCard } from "../NFT/TokenCard";
 
 enum ChooseType {
   MyItems,
@@ -83,8 +63,10 @@ const mockupOfferItemData = [
   {
     id: 2,
     name: "NFT AR Gun",
-    token: "2",
+    tokenId: "2",
     contractAddress: "0xCe5E904550ae8850813F98bA5A110ac20276770f",
+    chainId: "5",
+    isNft: true,
     metaData: {
       description: "Meta data description",
       external_url: "",
@@ -96,8 +78,10 @@ const mockupOfferItemData = [
   {
     id: 3,
     name: "NFT Knife",
-    token: "1",
+    tokenId: "1",
     contractAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    chainId: "5",
+    isNft: true,
     metaData: {
       description: "Meta data description",
       external_url: "",
@@ -108,20 +92,6 @@ const mockupOfferItemData = [
     },
   },
 ];
-
-const emptyData = {
-  id: 0,
-  name: "",
-  token: "",
-  contractAddress: "",
-  metaData: {
-    description: "",
-    external_url: "",
-    image: "",
-    name: "",
-    attributes: [],
-  },
-};
 
 const initialDnd = [
   {
@@ -154,7 +124,7 @@ const DndTrader = (dndProps: DndProps) => {
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
-  const [data, setData] = useState<Cards[] | []>([]);
+  const [data, setData] = useState<DndItem[] | []>([]);
   const [offerItem, setOfferItem] =
     useState<Array<Item | null>>(mockupOfferItemData);
   const [droppableBg, setDroppableBg] = useState<Array<Item | null>>();
@@ -165,6 +135,10 @@ const DndTrader = (dndProps: DndProps) => {
   useEffect(() => {
     setData(initialDnd);
   }, []);
+
+  const handleChangeItemType = (type: ItemType) => {
+    setItemType(type);
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -205,7 +179,7 @@ const DndTrader = (dndProps: DndProps) => {
         const offerItemIndex = offerItem.findIndex(
           (offer) =>
             offer &&
-            offer.token == item.token &&
+            offer.tokenId == item.tokenId &&
             offer.contractAddress == item.contractAddress
         );
         if (offerItemIndex !== -1) {
@@ -252,7 +226,6 @@ const DndTrader = (dndProps: DndProps) => {
         <div className={cn(`absolute pr-[20px] grid grid-cols-5 gap-2 z-0`)}>
           {Array.from({ length: 10 }).map((_, index) => {
             if (droppableBg && droppableBg[index]) {
-              console.log("xx if");
               return (
                 <OfferCard
                   key={index}
@@ -261,7 +234,6 @@ const DndTrader = (dndProps: DndProps) => {
                 />
               );
             } else {
-              console.log("xx else");
               return <BlankCard key={index} />;
             }
           })}
@@ -377,7 +349,7 @@ const DndTrader = (dndProps: DndProps) => {
                 <div className="flex gap-2 pl-4 items-center font-semibold">
                   <p className=" text-sm">Select Type</p>
                   <p
-                    onClick={() => setItemType(ItemType.NFTs)}
+                    onClick={() => handleChangeItemType(ItemType.NFTs)}
                     className={cn(
                       "rounded-full text-sm px-5 py-1 bg-primary-50 hover:cursor-pointer",
                       itemType == ItemType.NFTs && "text-white bg-primary"
@@ -386,7 +358,7 @@ const DndTrader = (dndProps: DndProps) => {
                     NFTs
                   </p>
                   <p
-                    onClick={() => setItemType(ItemType.Tokens)}
+                    onClick={() => handleChangeItemType(ItemType.Tokens)}
                     className={cn(
                       "rounded-full text-sm px-5 py-1 bg-primary-50 hover:cursor-pointer",
                       itemType == ItemType.Tokens && "text-white bg-primary"
@@ -496,6 +468,7 @@ const DndTrader = (dndProps: DndProps) => {
                                   <NftCard
                                     nftItem={component}
                                     chain={"polygon"}
+                                    isMicro={false}
                                   />
                                 </div>
                               )}
@@ -573,7 +546,8 @@ const DndTrader = (dndProps: DndProps) => {
                                       {...provided.draggableProps}
                                       ref={provided.innerRef}
                                     >
-                                      <MicroNftCard
+                                      <NftCard
+                                        isMicro={true}
                                         nftItem={component}
                                         chain={"polygon"}
                                       />
