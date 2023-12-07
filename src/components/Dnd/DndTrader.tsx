@@ -136,6 +136,12 @@ const DndTrader = (dndProps: DndProps) => {
     setData(initialDnd);
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      handleDroppableBg();
+    }
+  }, [data]);
+
   const handleChangeItemType = (type: ItemType) => {
     setItemType(type);
   };
@@ -197,12 +203,6 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
-  useEffect(() => {
-    if (data) {
-      handleDroppableBg();
-    }
-  }, [data]);
-
   const handleInputChange = (event: any) => {
     const lines = event.target.value.split("\n");
     if (lines.length > MAX_LINES) {
@@ -250,7 +250,7 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
-  const renderItem = ({
+  const PaginationItem = ({
     ref,
     key,
     value,
@@ -479,7 +479,6 @@ const DndTrader = (dndProps: DndProps) => {
                     </div>
                   )}
                 </Droppable>
-
                 <div id="pagination" className="flex flex-row justify-center">
                   <Pagination
                     disableCursorAnimation
@@ -488,7 +487,7 @@ const DndTrader = (dndProps: DndProps) => {
                     initialPage={1}
                     className="gap-2"
                     radius="full"
-                    renderItem={renderItem}
+                    renderItem={PaginationItem}
                     variant="light"
                   />
                 </div>
