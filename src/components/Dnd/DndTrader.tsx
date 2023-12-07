@@ -213,7 +213,7 @@ const DndTrader = (dndProps: DndProps) => {
   };
 
   const MyItemDropableBg = () => (
-    <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 -z-10`)}>
+    <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 z-0`)}>
       {Array.from({ length: 18 }).map((_, index) => (
         <BlankCard key={index} />
       ))}
@@ -511,7 +511,7 @@ const DndTrader = (dndProps: DndProps) => {
                     >
                       {(provided) => (
                         <div
-                          className="p-5 min-h-[260px] w-full border border-gray-100 rounded-lg overflow-hidden relative"
+                          className="p-5 min-h-[260px] w-full border border-gray-300 rounded-lg overflow-hidden relative"
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                         >
