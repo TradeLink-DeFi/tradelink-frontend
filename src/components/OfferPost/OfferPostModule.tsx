@@ -1,5 +1,3 @@
-// button, filter bar (search, select[nft collection, chain])
-
 import {
   Button,
   Input,
@@ -7,18 +5,26 @@ import {
   SelectItem,
   Image,
   Avatar,
+  Spinner,
 } from "@nextui-org/react";
 import { Plus, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import OfferPost from "./OfferPost";
+import { useAccount } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/router";
+
 import { getChains } from "@/services/chain.service";
 import { getNftCollection } from "@/services/nftCollection.service";
 import { getOffers } from "@/services/offer.service";
-import { OfferResponse } from "@/interfaces/offer.interface";
+import OfferPost from "./OfferPost";
 
-// offer post list
 export default function OfferPostModule() {
-  const [isDisabledCreate, setIsDisabledCreate] = useState(false);
+  const { isConnected } = useAccount();
+  const router = useRouter();
+  const { data: offerPosts, isLoading } = useQuery({
+    queryKey: ["offers"],
+    queryFn: getOffers,
+  });
   const [chainFilterList, setChainFilterList] = useState<
     {
       label: string;
@@ -31,7 +37,6 @@ export default function OfferPostModule() {
       value: string;
     }[]
   >([]);
-  const [offerPosts, setOfferPosts] = useState<OfferResponse[]>();
 
   const getChainFilterList = async () => {
     const chains = await getChains();
@@ -56,27 +61,27 @@ export default function OfferPostModule() {
       (nftCollection) =>
         nftCollection && setNftCollectioFilterList(nftCollection)
     );
-    getOffers().then((offers) => offers && setOfferPosts(offers));
   }, []);
 
   return (
     <div className="space-y-3">
       <Button
         color="primary"
-        isDisabled={isDisabledCreate}
+        isDisabled={!isConnected}
         startContent={<Plus width={20} />}
         className="font-semibold text-base"
+        onPress={() => router.push("offer")}
       >
         Create Offer
       </Button>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center space-x-6">
         <Input
           type="text"
           size="lg"
           placeholder="Search ..."
           labelPlacement="outside"
           startContent={<Search color="#385BD2" />}
-          className="w-3/5"
+          className="w-3/4"
           variant="bordered"
           classNames={{
             innerWrapper: "bg-transparent",
@@ -138,9 +143,11 @@ export default function OfferPostModule() {
           </div>
         </div>
       </div>
-      {offerPosts?.map((offerPost, key) => {
-        return <OfferPost key={key} />;
-      })}
+      {isLoading ? (
+        <Spinner size="lg" />
+      ) : (
+        offerPosts?.map((offerPost, key) => <OfferPost key={key} data={offerPost} />)
+      )}
     </div>
   );
 }
