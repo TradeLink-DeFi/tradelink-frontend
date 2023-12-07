@@ -8,7 +8,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="w-full sticky top-0 bg-white z-50">
+      <nav className="w-full sticky top-0 bg-white z-50 shadow-lg shadow-slate-100">
         <div className="h-[72px] px-[10px] sm:px-[24px] flex flex-row justify-between items-center bg-white border-solid border-b-1 border-[##EFEFEF]">
           <Image
             alt="trans-logo"

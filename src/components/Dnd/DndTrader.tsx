@@ -136,6 +136,12 @@ const DndTrader = (dndProps: DndProps) => {
     setData(initialDnd);
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      handleDroppableBg();
+    }
+  }, [data]);
+
   const handleChangeItemType = (type: ItemType) => {
     setItemType(type);
   };
@@ -197,12 +203,6 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
-  useEffect(() => {
-    if (data) {
-      handleDroppableBg();
-    }
-  }, [data]);
-
   const handleInputChange = (event: any) => {
     const lines = event.target.value.split("\n");
     if (lines.length > MAX_LINES) {
@@ -213,7 +213,7 @@ const DndTrader = (dndProps: DndProps) => {
   };
 
   const MyItemDropableBg = () => (
-    <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 -z-10`)}>
+    <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 z-0`)}>
       {Array.from({ length: 18 }).map((_, index) => (
         <BlankCard key={index} />
       ))}
@@ -250,7 +250,7 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
-  const renderItem = ({
+  const PaginationItem = ({
     ref,
     key,
     value,
@@ -479,7 +479,6 @@ const DndTrader = (dndProps: DndProps) => {
                     </div>
                   )}
                 </Droppable>
-
                 <div id="pagination" className="flex flex-row justify-center">
                   <Pagination
                     disableCursorAnimation
@@ -488,7 +487,7 @@ const DndTrader = (dndProps: DndProps) => {
                     initialPage={1}
                     className="gap-2"
                     radius="full"
-                    renderItem={renderItem}
+                    renderItem={PaginationItem}
                     variant="light"
                   />
                 </div>
@@ -512,7 +511,7 @@ const DndTrader = (dndProps: DndProps) => {
                     >
                       {(provided) => (
                         <div
-                          className="p-5 min-h-[260px] w-full border border-gray-100 rounded-lg overflow-hidden relative"
+                          className="p-5 min-h-[260px] w-full border border-gray-300 rounded-lg overflow-hidden relative"
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                         >
