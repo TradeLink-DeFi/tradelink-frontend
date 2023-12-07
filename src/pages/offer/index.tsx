@@ -11,6 +11,7 @@ import {
   GET_FUJI,
 } from "../../../grqphql/queries";
 import { useEffect, useState } from "react";
+import { Spinner } from "@nextui-org/react";
 
 export default function OfferPage() {
   const [allNftsData, setAllNftsData] = useState<Array<Object>>();
@@ -72,7 +73,9 @@ export default function OfferPage() {
           <DndTrader isCreateOffer={true} />
         </>
       ) : (
-        <p>Loading</p>
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <Spinner size="lg" color="primary" />
+        </div>
       )}
     </MainLayout>
   );
