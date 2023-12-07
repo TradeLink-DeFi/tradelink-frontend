@@ -14,7 +14,7 @@ export default function OfferHistoryModule() {
     setIsFilterOfferProcessing(filter);
   };
   return (
-    <div className="bg-white rounded-lg min-h-screen py-4 space-y-3">
+    <div className="bg-white rounded-lg min-h-screen py-4 space-y-3 border">
       <h2 className="font-semibold text-xl px-6">History</h2>
       <hr />
       {isConnected ? (
