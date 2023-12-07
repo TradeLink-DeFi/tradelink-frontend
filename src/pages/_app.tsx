@@ -8,14 +8,16 @@ import ReactQueryProvider from "@/providers/ReactQuery.provider";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <RainbowWagmiProvider>
-      <AuthProvider>
-        <NextUIProvider>
-          <ApolloProviders>
-            <Component {...pageProps} />
-          </ApolloProviders>
-        </NextUIProvider>
-      </AuthProvider>
-    </RainbowWagmiProvider>
+    <ReactQueryProvider>
+      <RainbowWagmiProvider>
+        <AuthProvider>
+          <NextUIProvider>
+            <ApolloProviders>
+              <Component {...pageProps} />
+            </ApolloProviders>
+          </NextUIProvider>
+        </AuthProvider>
+      </RainbowWagmiProvider>
+    </ReactQueryProvider>
   );
 }
