@@ -40,6 +40,17 @@ export interface Token {
   chain: string;
 }
 
+export interface OfferHistory {
+  _id: string;
+  createdAt: Date;
+  status: number;
+}
+
+export interface GroupedOfferHistory {
+  date: string;
+  offers: OfferHistory[];
+}
+
 export interface OfferResponse {
   _id: string;
   tokenIn: Token[];
