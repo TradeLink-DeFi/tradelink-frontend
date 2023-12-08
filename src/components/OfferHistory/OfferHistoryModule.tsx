@@ -18,7 +18,7 @@ export default function OfferHistoryModule() {
       <h2 className="font-semibold text-xl px-6">History</h2>
       <hr />
       {isConnected ? (
-        <div className="px-6 space-y-2">
+        <div className="px-6 space-y-2 min-h-screen">
           <div className="flex space-x-2">
             <Button
               radius="full"

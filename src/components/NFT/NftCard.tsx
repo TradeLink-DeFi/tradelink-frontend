@@ -4,15 +4,22 @@ import { NFTItem } from "@/interfaces/item.interface";
 import { cn } from "../../../lib/utils";
 import { NftMetaData } from "@/interfaces/nft.interface";
 import { getMetaData } from "@/services/metadata.service";
+import { chainPathMapping } from "@/configs/chian.config";
 
 export const NftCard = ({
   nftItem,
+  nftItemCache,
   chain,
-  isMicro,
+  width = 200,
+  height = 200,
+  isMicro = false,
 }: {
+  nftItemCache?: { nftUrl: string; nftId: string };
+  width?: number;
+  height?: number;
   nftItem: NFTItem | null;
   chain: string;
-  isMicro: boolean;
+  isMicro?: boolean;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [metaData, setMetaData] = useState<NftMetaData>();
@@ -46,22 +53,22 @@ export const NftCard = ({
       >
         <Image
           className="rounded-lg relative"
-          width={200}
-          height={200}
-          src={metaData?.image}
+          width={width}
+          height={height}
+          src={metaData?.image ?? nftItemCache?.nftUrl}
           alt=""
           draggable={false}
         />
         <Avatar
           className="absolute z-20 top-2 left-2 w-[15px] h-[15px] opacity-80"
-          src={"/images/polygon.jpeg"}
+          src={chainPathMapping(chain || -1)}
         />
         {isHovered && (
           <div className="z-10 absolute h-1/4 left-0 right-0 bottom-0 flex items-center justify-start px-2 bg-white bg-opacity-40 rounded-b-lg">
             <div className="flex flex-col items-center w-full">
               <p
                 className={cn("text-white font-light", isMicro && "text-xs")}
-              >{`#${nftItem?.tokenId}`}</p>
+              >{`#${nftItem?.tokenId ?? nftItemCache?.nftId}`}</p>
             </div>
           </div>
         )}
