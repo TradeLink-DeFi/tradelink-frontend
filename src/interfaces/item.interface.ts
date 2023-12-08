@@ -10,10 +10,17 @@ export interface Item {
   metaData: NftMetaData | null;
 }
 
+export interface NFTItem {
+  contentURI: string;
+  createdAtTimestamp: string;
+  id: string;
+  tokenId: string;
+  __typename: string;
+}
 
 export interface DndItem {
   id: number;
   title: string;
   icon: string | undefined;
-  components: Item[] | [];
+  components: NFTItem[] | [];
 }

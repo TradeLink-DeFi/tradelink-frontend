@@ -14,47 +14,6 @@ import { useEffect, useState } from "react";
 import { Spinner } from "@nextui-org/react";
 
 export default function OfferPage() {
-  const [allNftsData, setAllNftsData] = useState<Array<Object>>();
-
-  const { data: sepoliaNfts } = useQuery(GET_SEPOLIA, {
-    context: { clientName: "sepolia" },
-  });
-
-  const { data: mumbaiNfts } = useQuery(GET_MUMBAI, {
-    context: { clientName: "mumbai" },
-  });
-
-  const { data: bscNfts } = useQuery(GET_BSC, {
-    context: { clientName: "bsc" },
-  });
-
-  const { data: fujiNfts } = useQuery(GET_FUJI, {
-    context: { clientName: "fuji" },
-  });
-
-  const { data: optimismNfts } = useQuery(GET_OPTIMISM, {
-    context: { clientName: "optimism" },
-  });
-
-  const { data: mySepolia } = useQuery(GET_SEPOLIA_BY_ADDRESS, {
-    variables: { walletAddress: "0x443fe6af640c1e6dec1efc4468451e6765152e94" },
-    context: { clientName: "sepolia" },
-  });
-
-  useEffect(() => {
-    if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
-      const allNfts = [
-        sepoliaNfts,
-        mumbaiNfts,
-        bscNfts,
-        fujiNfts,
-        optimismNfts,
-      ];
-      console.log("allNfts", allNfts);
-      setAllNftsData(allNfts);
-    }
-  }, [sepoliaNfts, mumbaiNfts, bscNfts, fujiNfts, optimismNfts]);
-
   return (
     <MainLayout>
       <Head>
@@ -65,18 +24,10 @@ export default function OfferPage() {
         />
       </Head>
 
-      {allNftsData ? (
-        <>
-          <div className="w-full">
-            <p className="text-xl font-semibold text-left">Create Offer</p>
-          </div>
-          <DndTrader isCreateOffer={true} />
-        </>
-      ) : (
-        <div className="flex min-h-[80vh] items-center justify-center">
-          <Spinner size="lg" color="primary" />
-        </div>
-      )}
+      <div className="w-full">
+        <p className="text-xl font-semibold text-left">Create Offer</p>
+      </div>
+      <DndTrader isCreateOffer={true} />
     </MainLayout>
   );
 }
