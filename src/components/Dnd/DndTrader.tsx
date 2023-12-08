@@ -6,7 +6,6 @@ import {
   Draggable,
   DropResult,
   Droppable,
-  resetServerContext,
 } from "react-beautiful-dnd";
 import { DndContext } from "@/contexts/DndContext";
 import { NftCard } from "../NFT/NftCard";
@@ -92,7 +91,7 @@ const DndTrader = (dndProps: DndProps) => {
     SelectItemProps[]
   >([]);
 
-  const [fckingIdiot, setFckingIdiot] = useState<boolean>(false);
+  const [toggleDnd, setToggleDnd] = useState<boolean>(false);
 
   const MAX_LINES = 5;
   const MAX_LENGTH = 200;
@@ -187,11 +186,11 @@ const DndTrader = (dndProps: DndProps) => {
     if (myNftsFiltered && myNftsFiltered?.length > 0) {
       InitialDnd[0].components = [...myNftsFiltered];
       setData(InitialDnd);
-      setFckingIdiot(!fckingIdiot);
+      setToggleDnd(!toggleDnd);
     } else {
       InitialDnd[0].components = [];
       setData(InitialDnd);
-      setFckingIdiot(!fckingIdiot);
+      setToggleDnd(!toggleDnd);
     }
   }, [myNftsFiltered]);
 
