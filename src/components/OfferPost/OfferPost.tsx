@@ -32,16 +32,23 @@ export default function OfferPost({ data }: OfferPostProps) {
             <p className="text-[#313235] text-base font-semibold">I want</p>
           </div>
           <div className="flex space-x-3">
-            {data.nftIn.map((nft) => (
-              <Image
-                src={nft.imageUrl}
+            {data.nftIn.map((nft, key) => (
+              <NftCard
+                key={key}
+                nftItem={null}
+                nftItemCache={{ nftUrl: nft.imageUrl, nftId: nft.nftId }}
+                chain={data.chainA[0].chainId}
+                isMicro
                 width={64}
-                alt={nft.name}
-                key={nft.nftId}
+                height={64}
               />
             ))}
             {data.tokenIn.map((token, key) => (
-              <div key={key}>{token.name}</div>
+              <TokenCard
+                key={key}
+                itemCache={{ ...token, amount: data.tokenInAmount[key]}}
+                chain={data.chainTokenIn[key].chainId}
+              />
             ))}
           </div>
           <hr className="w-full" />
@@ -51,12 +58,22 @@ export default function OfferPost({ data }: OfferPostProps) {
           </div>
 
           <div className="flex space-x-3">
-            {data.nftOut.map((nft) => (
-              <Image
-                src={nft.imageUrl}
+            {data.nftOut.map((nft, key) => (
+              <NftCard
+                key={key}
+                nftItem={null}
+                nftItemCache={{ nftUrl: nft.imageUrl, nftId: nft.nftId }}
+                chain={data.chainB[0].chainId}
+                isMicro
                 width={64}
-                alt={nft.name}
-                key={nft.nftId}
+                height={64}
+              />
+            ))}
+            {data.tokenOut.map((token, key) => (
+              <TokenCard
+                key={key}
+                itemCache={{ ...token, amount: data.tokenOutAmount[key]}}
+                chain={data.chainTokenOut[key].chainId}
               />
             ))}
           </div>

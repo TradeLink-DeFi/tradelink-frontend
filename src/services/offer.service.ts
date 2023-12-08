@@ -1,10 +1,11 @@
-import { GroupedOfferHistory, OfferResponse } from "@/interfaces/offer.interface";
+import { GroupedOfferHistory, OfferResponse, OfferStatus } from "@/interfaces/offer.interface";
 import axios from "axios";
 
 interface GetOffersProps {
   chainId?: string;
   nftCollectionId?: string;
   search?: string;
+  status?: OfferStatus;
 }
 
 const getOffers = async (query: GetOffersProps) => {
