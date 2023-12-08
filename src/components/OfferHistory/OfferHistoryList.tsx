@@ -9,11 +9,11 @@ import { useRouter } from "next/router";
 import { useAccount } from "wagmi";
 
 interface OfferHistoryListProps {
-  isProcessing?: boolean;
+  isTrader?: boolean;
 }
 
 export default function OfferHistoryList({
-  isProcessing,
+  isTrader,
 }: OfferHistoryListProps) {
   const {
     data: offerHistoryGroup,
@@ -21,7 +21,7 @@ export default function OfferHistoryList({
     refetch,
   } = useQuery({
     queryKey: ["offerHistoryGroup"],
-    queryFn: () => mapHistroyByDateGroup(isProcessing),
+    queryFn: () => mapHistroyByDateGroup(isTrader),
     refetchInterval: 3000,
   });
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function OfferHistoryList({
   useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isProcessing, isConnected]);
+  }, [isTrader, isConnected]);
 
   if (isLoading) return <Spinner size="lg" />;
   else if (offerHistoryGroup && offerHistoryGroup?.length)

@@ -8,10 +8,10 @@ import OfferHistoryList from "./OfferHistoryList";
 // filter my offer and on going offer
 export default function OfferHistoryModule() {
   const { isConnected } = useAccount();
-  const [isFilterOfferProcessing, setIsFilterOfferProcessing] = useState(false);
+  const [isNotTrader, setIsNotTrader] = useState(false);
 
   const onSelectFiltterOffer = (filter: boolean) => {
-    setIsFilterOfferProcessing(filter);
+    setIsNotTrader(filter);
   };
   return (
     <div className="bg-white rounded-lg min-h-screen py-4 space-y-3 border">
@@ -25,7 +25,7 @@ export default function OfferHistoryModule() {
               color="primary"
               className={cn(
                 "text-sm font-semibold",
-                isFilterOfferProcessing ? "text-[#313235] bg-[#DFE9FA]" : ""
+                isNotTrader ? "text-[#313235] bg-[#DFE9FA]" : ""
               )}
               onPress={() => onSelectFiltterOffer(false)}
             >
@@ -36,14 +36,14 @@ export default function OfferHistoryModule() {
               color="primary"
               className={cn(
                 "text-sm font-semibold",
-                !isFilterOfferProcessing ? "text-[#313235] bg-[#DFE9FA]" : ""
+                !isNotTrader ? "text-[#313235] bg-[#DFE9FA]" : ""
               )}
               onPress={() => onSelectFiltterOffer(true)}
             >
               On Going
             </Button>
           </div>
-          <OfferHistoryList isProcessing={isFilterOfferProcessing} />
+          <OfferHistoryList isTrader={!isNotTrader} />
         </div>
       ) : (
         <div className="flex flex-col px-6 space-y-3 justify-center items-center pt-56">

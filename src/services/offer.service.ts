@@ -31,17 +31,17 @@ const getOffers = async (query: GetOffersProps) => {
 };
 
 // filterByUser
-const getHistory = async (processing?: boolean) => {
+const getHistory = async (isTrader?: boolean) => {
   try {
-    const { data } = await axios.get<OfferResponse[]>(processing ? `/offer/history?processing=true` : "/offer/history");
+    const { data } = await axios.get<OfferResponse[]>(isTrader ? `/offer/history?isTrader=true` : "/offer/history");
     return data;
   } catch (err) {
     console.log("error", err);
   }
 };
 
-const mapHistroyByDateGroup = async (processing?: boolean) => {
-  const offer = await getHistory(processing);
+const mapHistroyByDateGroup = async (isTrader?: boolean) => {
+  const offer = await getHistory(isTrader);
   const offerGroupping = offer?.reduce((acc: GroupedOfferHistory[], item: any) => {
     const dateKey: string = new Date(item.createdAt).toLocaleDateString();
     const existingDateIndex: number = acc.findIndex(
