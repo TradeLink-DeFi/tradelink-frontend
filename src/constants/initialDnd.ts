@@ -1,8 +1,10 @@
-export const itemsData = [
+import { DndItem } from "@/interfaces/item.interface";
+
+export const InitialDnd: DndItem[] = [
   {
     id: 0,
     title: "My Items",
-    icon: "/vectors/greenThump.svg",
+    icon: "",
     components: [],
   },
   {

@@ -50,7 +50,7 @@ export const GET_MUMBAI = gql`
 export const GET_MUMBAI_BY_ADDRESS = gql`
   query MyMumbai($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      astroDogNfts {
+      astroDogNft {
         tokenId
         id
         contentURI
@@ -74,7 +74,7 @@ export const GET_BSC = gql`
 export const GET_BSC_BY_ADDRESS = gql`
   query MyBsc($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      goldenBullNfts {
+      goldenBullNft {
         tokenId
         id
         contentURI

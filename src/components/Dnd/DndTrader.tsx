@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
-import { myItems } from "@/constants/mockMyItem";
+import React, { useCallback } from "react";
 import { useEffect, useRef, useState } from "react";
-import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
+import {
+  Draggable,
+  DropResult,
+  Droppable,
+  resetServerContext,
+} from "react-beautiful-dnd";
 import { DndContext } from "@/contexts/DndContext";
 import { NftCard } from "../NFT/NftCard";
 import { BlankCard } from "../NFT/BlankCard";
@@ -20,12 +24,19 @@ import {
   PaginationItemType,
   PaginationItemRenderProps,
   Textarea,
+  Spinner,
 } from "@nextui-org/react";
-import { Search, ChevronLeft } from "lucide-react";
+import { Search } from "lucide-react";
 import { ChevronIcon } from "@/constants/ChavronIcon";
 import { OfferCard } from "../NFT/OfferCard";
-import { DndItem, Item } from "@/interfaces/item.interface";
+import { DndItem, Item, NFTItem } from "@/interfaces/item.interface";
 import { TokenCard } from "../NFT/TokenCard";
+import { getChains } from "@/services/chain.service";
+import { getNftCollection } from "@/services/nftCollection.service";
+import * as query from "../../../grqphql/queries";
+import { InitialDnd } from "@/constants/initialDnd";
+import { useQuery } from "@apollo/client";
+import { useAccount } from "wagmi";
 
 enum ChooseType {
   MyItems,
@@ -37,80 +48,14 @@ enum ItemType {
   Tokens,
 }
 
-const collections = [
-  {
-    label: "Collection 1",
-    value: "Collection 1",
-  },
-  {
-    label: "Collection 2",
-    value: "Collection 2",
-  },
-];
-
-const chains = [
-  {
-    label: "Polygon",
-    value: "POL",
-  },
-  {
-    label: "Ethereum",
-    value: "ETH",
-  },
-];
-
 const mockupOfferItemData = [
   {
-    id: 2,
-    name: "NFT AR Gun",
-    tokenId: "2",
-    contractAddress: "0xCe5E904550ae8850813F98bA5A110ac20276770f",
-    chainId: "5",
-    isNft: true,
-    metaData: {
-      description: "Meta data description",
-      external_url: "",
-      image: "https://th.bing.com/th/id/OIG.bVV.VVoCj8sw2BGl73vG?pid=ImgGn", // Gun 2
-      name: "AR 2",
-      attributes: [],
-    },
-  },
-  {
-    id: 3,
-    name: "NFT Knife",
-    tokenId: "1",
-    contractAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    chainId: "5",
-    isNft: true,
-    metaData: {
-      description: "Meta data description",
-      external_url: "",
-      image:
-        "https://th.bing.com/th/id/OIG.rt01.E7.L3SZmywZ5pv7?w=1024&h=1024&rs=1&pid=ImgDetMain", // Knife
-      name: "Knift 1",
-      attributes: [],
-    },
-  },
-];
-
-const initialDnd = [
-  {
-    id: 0,
-    title: "My Items",
-    icon: "/vectors/greenThump.svg",
-    components: myItems,
-  },
-  {
-    id: 1,
-    title: "Offers you want",
-    icon: "/vectors/greenThump.svg",
-    components: [],
-  },
-  {
-    id: 2,
-    title: "Your trade offer",
-    icon: "/vectors/blueLike.svg",
-    components: [],
+    contentURI:
+      "https://ipfs.filebase.io/ipfs/QmVDX4qk6vDW6LysYCo8zuGbLMESeWhPCHtG4EPKPUDTC2",
+    createdAtTimestamp: "1701422328",
+    id: "0",
+    tokenId: "0",
+    __typename: "BadApeNft",
   },
 ];
 
@@ -118,23 +63,137 @@ interface DndProps {
   isCreateOffer: boolean;
 }
 
+interface SelectItemProps {
+  label: string;
+  value: string;
+}
+
 const DndTrader = (dndProps: DndProps) => {
   const myElementRef = useRef<HTMLDivElement>(null);
+  const account = useAccount();
 
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
   const [data, setData] = useState<DndItem[] | []>([]);
   const [offerItem, setOfferItem] =
-    useState<Array<Item | null>>(mockupOfferItemData);
-  const [droppableBg, setDroppableBg] = useState<Array<Item | null>>();
+    useState<Array<NFTItem | null>>(mockupOfferItemData);
+  const [droppableBg, setDroppableBg] = useState<Array<NFTItem | null>>();
+  const [allNftsData, setAllNftsData] = useState<Array<Object>>();
+  const [myNftsData, setMyNftsData] = useState<Array<Object>>();
+  const [myNftsFiltered, setMyNftsFiltered] = useState<Array<NFTItem>>();
+
+  const [selectedChain, setSelectedChain] = useState<string>("11155111");
+  const [selectedCollection, setSelectedCollection] =
+    useState<SelectItemProps>();
+
+  const [chainFilterList, setChainFilterList] = useState<SelectItemProps[]>([]);
+  const [nftCollectionFilterList, setNftCollectioFilterList] = useState<
+    SelectItemProps[]
+  >([]);
+
+  const [fckingIdiot, setFckingIdiot] = useState<boolean>(false);
 
   const MAX_LINES = 5;
   const MAX_LENGTH = 200;
 
+  const { data: sepoliaNfts } = useQuery(query.GET_SEPOLIA, {
+    context: { clientName: "sepolia" },
+  });
+
+  const { data: mumbaiNfts } = useQuery(query.GET_MUMBAI, {
+    context: { clientName: "mumbai" },
+  });
+
+  const { data: bscNfts } = useQuery(query.GET_BSC, {
+    context: { clientName: "bsc" },
+  });
+
+  const { data: fujiNfts } = useQuery(query.GET_FUJI, {
+    context: { clientName: "fuji" },
+  });
+
+  const { data: optimismNfts } = useQuery(query.GET_OPTIMISM, {
+    context: { clientName: "optimism" },
+  });
+
+  const { data: mySepoliaNfts, refetch: sepoliaRefetch } = useQuery(
+    query.GET_SEPOLIA_BY_ADDRESS,
+    {
+      variables: { walletAddress: account?.address?.toLocaleLowerCase() ?? 0 },
+      context: { clientName: "sepolia" },
+    }
+  );
+
+  const { data: myMumbaiNfts, refetch: mumbaiRefetch } = useQuery(
+    query.GET_MUMBAI_BY_ADDRESS,
+    {
+      variables: { walletAddress: account?.address?.toLocaleLowerCase() ?? 0 },
+      context: { clientName: "mumbai" },
+    }
+  );
+
+  const { data: myBscNfts, refetch: bscRefetch } = useQuery(
+    query.GET_BSC_BY_ADDRESS,
+    {
+      variables: { walletAddress: account?.address?.toLocaleLowerCase() ?? 0 },
+      context: { clientName: "bsc" },
+    }
+  );
+
   useEffect(() => {
-    setData(initialDnd);
+    if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
+      const allNfts = [
+        sepoliaNfts,
+        mumbaiNfts,
+        bscNfts,
+        fujiNfts,
+        optimismNfts,
+      ];
+      console.log("allNfts", allNfts);
+      setAllNftsData(allNfts);
+    }
+  }, [sepoliaNfts, mumbaiNfts, bscNfts, fujiNfts, optimismNfts]);
+
+  useEffect(() => {
+    if (mySepoliaNfts && myMumbaiNfts && myBscNfts) {
+      const myNfts = [
+        mySepoliaNfts?.users[0] ?? null,
+        myMumbaiNfts?.users[0] ?? null,
+        myBscNfts?.users[0] ?? null,
+      ];
+      handleFilterNft();
+      setMyNftsData(myNfts);
+    }
+  }, [mySepoliaNfts, myMumbaiNfts, myBscNfts]);
+
+  useEffect(() => {
+    getChainFilterList().then((chain) => {
+      if (chain) {
+        setChainFilterList(chain);
+      }
+    });
+    getNftCollectionFilterList().then((nftCollection) => {
+      if (nftCollection) {
+        setNftCollectioFilterList(nftCollection);
+        setSelectedCollection(
+          nftCollection.filter((col) => col.label == "BadApe")[0]
+        );
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    if (myNftsFiltered && myNftsFiltered?.length > 0) {
+      InitialDnd[0].components = [...myNftsFiltered];
+      setData(InitialDnd);
+      setFckingIdiot(!fckingIdiot);
+    } else {
+      InitialDnd[0].components = [];
+      setData(InitialDnd);
+      setFckingIdiot(!fckingIdiot);
+    }
+  }, [myNftsFiltered]);
 
   useEffect(() => {
     if (data) {
@@ -142,8 +201,73 @@ const DndTrader = (dndProps: DndProps) => {
     }
   }, [data]);
 
+  const getChainFilterList = async () => {
+    const chains = await getChains();
+    return chains?.map((chain) => ({
+      label: chain.chainName,
+      value: chain.chainId,
+    }));
+  };
+
+  const getNftCollectionFilterList = async () => {
+    const nftCollections = await getNftCollection();
+    return nftCollections?.map((nftCollection) => ({
+      label: nftCollection.name,
+      value: nftCollection._id,
+    }));
+  };
+
   const handleChangeItemType = (type: ItemType) => {
     setItemType(type);
+  };
+
+  const handleChangeChain = (chainId: string) => {
+    setSelectedChain(chainId);
+  };
+
+  const handleChangeCollection = async (collectionId: string) => {
+    const selectedCol = nftCollectionFilterList.filter(
+      (col) => col.value == collectionId
+    )[0];
+    setSelectedCollection(selectedCol);
+  };
+
+  useEffect(() => {
+    if (selectedChain || selectedCollection) {
+      handleFilterNft();
+    }
+  }, [selectedChain, selectedCollection]);
+
+  const handleFilterNft = async () => {
+    let myNftsFiltered: NFTItem[] | [];
+    console.log("selectedChain", selectedChain);
+    console.log("selectedCollection", selectedCollection);
+    switch (selectedChain) {
+      case "11155111":
+        await sepoliaRefetch();
+        if (selectedCollection?.label == "BadApe") {
+          myNftsFiltered = mySepoliaNfts?.users[0]?.badApeNfts;
+        } else if (selectedCollection?.label == "CyberBear") {
+          myNftsFiltered = mySepoliaNfts?.users[0]?.cyberBearNfts;
+        } else {
+          myNftsFiltered = [];
+        }
+        break;
+      case "80001":
+        await mumbaiRefetch();
+        if (selectedCollection?.label == "AstroDog") {
+          myNftsFiltered = myMumbaiNfts?.users[0]?.astroDogNft;
+        } else {
+          myNftsFiltered = [];
+        }
+        break;
+      default:
+        myNftsFiltered = [];
+        console.log("Invalid selectedChain");
+        break;
+    }
+    setMyNftsFiltered(myNftsFiltered);
+    return myNftsFiltered;
   };
 
   const onDragEnd = (result: DropResult) => {
@@ -179,14 +303,14 @@ const DndTrader = (dndProps: DndProps) => {
   const handleDroppableBg = () => {
     let offerArray = [...offerItem];
     const droppableItem = data[2]?.components || [];
-    let result: (Item | null)[] = Array(droppableItem?.length).fill(null);
+    let result: (NFTItem | null)[] = Array(droppableItem?.length).fill(null);
     if (droppableItem?.length > 0) {
       droppableItem?.forEach(async (item, index) => {
         const offerItemIndex = offerItem.findIndex(
           (offer) =>
             offer &&
             offer.tokenId == item.tokenId &&
-            offer.contractAddress == item.contractAddress
+            offer.__typename == item.__typename
         );
         if (offerItemIndex !== -1) {
           result[index] = offerArray[offerItemIndex];
@@ -308,10 +432,10 @@ const DndTrader = (dndProps: DndProps) => {
     );
   };
 
-  return (
+  return allNftsData && myNftsData ? (
     <>
       <DndContext onDragEnd={onDragEnd}>
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center w-full">
           <div className="w-full flex flex-row gap-4 justify-between my-8">
             {data[0]?.id == 0 ? (
               <div className="w-8/12 h-full">
@@ -373,68 +497,74 @@ const DndTrader = (dndProps: DndProps) => {
                     size="sm"
                     aria-label="search"
                     placeholder="Search"
+                    variant="bordered"
                     classNames={{
-                      inputWrapper: [
-                        "border border-gray-300",
-                        "bg-white",
-                        "backdrop-blur-xl",
-                        "backdrop-saturate-200",
-                        "hover:bg-white",
-                        "group-data-[focused=true]:bg-default-200/50",
-                        "!cursor-text",
-                      ],
+                      innerWrapper: "bg-transparent",
+                      inputWrapper: ["border", "bg-white"],
                     }}
-                    startContent={
-                      <Search className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-                    }
+                    startContent={<Search color="#385BD2" />}
                   />
                   <Select
-                    aria-label="collection"
                     size="sm"
-                    defaultSelectedKeys={[collections[0].value]}
+                    placeholder="Select Collection NFT"
+                    defaultSelectedKeys={["65716f0d31a5f409f8fbdc54"]}
                     disallowEmptySelection
+                    variant="bordered"
                     classNames={{
                       base: ["w-[400px]"],
-                      trigger: ["border border-gray-300", "bg-white"],
+                      label: "font-semibold text-sm text-[#000211]",
+                      trigger: ["border", "bg-white"],
+                    }}
+                    label=""
+                    onChange={(e) => {
+                      handleChangeCollection(e.target.value);
                     }}
                   >
-                    {collections.map((collection, index) => (
+                    {nftCollectionFilterList.map((nftCollection) => (
                       <SelectItem
-                        key={collection.value}
-                        value={collection.value}
+                        key={nftCollection.value}
+                        value={nftCollection.value}
                       >
-                        {collection.label}
+                        {nftCollection.label}
                       </SelectItem>
                     ))}
                   </Select>
                   <Select
-                    aria-label="chains"
                     size="sm"
-                    defaultSelectedKeys={[chains[0].value]}
-                    startContent={
-                      <Avatar
-                        className="w-12"
-                        size="sm"
-                        src="/images/polygon.jpeg"
-                      />
-                    }
+                    items={chainFilterList}
                     disallowEmptySelection
+                    variant="bordered"
                     classNames={{
-                      base: ["w-[300px]"],
-                      trigger: ["border border-gray-300", "bg-white"],
+                      base: "w-[160px]",
+                      label: ["font-semibold", "text-sm", "text-[#000211]"],
+                      trigger: ["border", "bg-white"],
+                    }}
+                    defaultSelectedKeys={["11155111"]}
+                    placeholder="chain"
+                    renderValue={(items) => {
+                      return items.map((item) => (
+                        <Avatar
+                          src={`/chains/${item.data?.label}.png`}
+                          alt={item.data?.label}
+                          size="sm"
+                          key={item.key}
+                        />
+                      ));
+                    }}
+                    onChange={(e) => {
+                      handleChangeChain(e.target.value);
                     }}
                   >
-                    {chains.map((chain, index) => (
-                      <SelectItem
-                        key={chain.value}
-                        value={chain.value}
-                        startContent={
-                          <Avatar size="sm" src="/images/polygon.jpeg" />
-                        }
-                      >
-                        {chain.value}
+                    {(chain) => (
+                      <SelectItem key={chain.value} value={chain.value}>
+                        <Image
+                          src={`/chains/${chain.label}.png`}
+                          alt={chain.label}
+                          width={30}
+                          height={30}
+                        />
                       </SelectItem>
-                    ))}
+                    )}
                   </Select>
                 </div>
 
@@ -593,9 +723,8 @@ const DndTrader = (dndProps: DndProps) => {
                   inputWrapper: [
                     "border border-gray-200",
                     "bg-white",
+                    "group-data-[hover=true]:bg-white",
                     "placeHolder: text-gray-400",
-                    "hover:bg-white",
-                    "group-data-[focused=true]:bg-white",
                   ],
                 }}
                 placeholder="Write something ..."
@@ -613,6 +742,10 @@ const DndTrader = (dndProps: DndProps) => {
         )
       }
     </>
+  ) : (
+    <div className="flex min-h-[80vh] items-center justify-center">
+      <Spinner size="lg" color="primary" />
+    </div>
   );
 };
 

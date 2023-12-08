@@ -1,16 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, Image } from "@nextui-org/react";
 import { NftMetaData } from "@/interfaces/nft.interface";
-import { Item } from "@/interfaces/item.interface";
+import { NFTItem } from "@/interfaces/item.interface";
+import { useQuery } from "@tanstack/react-query";
+import { getMetaData } from "@/services/metadata.service";
 
 export const OfferCard = ({
   nftItem,
   chain,
 }: {
-  nftItem: Item | null;
+  nftItem: NFTItem | null;
   chain: string;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [metaData, setMetaData] = useState<NftMetaData>();
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -19,6 +22,18 @@ export const OfferCard = ({
   const handleMouseLeave = () => {
     setIsHovered(false);
   };
+
+  useEffect(() => {
+    if (nftItem?.contentURI) {
+      getMetaData(nftItem?.contentURI)
+        .then((res) => {
+          setMetaData(res?.data);
+        })
+        .catch((error) => {
+          console.log("getMetaData error", error);
+        });
+    }
+  }, [nftItem?.contentURI]);
 
   return (
     <div className="rounded-lg opacity-30">
@@ -31,8 +46,8 @@ export const OfferCard = ({
           className="rounded-lg relative"
           width={200}
           height={200}
-          src={nftItem?.metaData?.image}
-          alt={nftItem?.metaData?.name}
+          src={metaData?.image}
+          alt={metaData?.name}
           draggable={false}
         />
         <Avatar
