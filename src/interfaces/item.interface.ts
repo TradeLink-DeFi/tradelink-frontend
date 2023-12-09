@@ -27,6 +27,7 @@ export interface TokenItem {
   type: string;
   __v: number;
   _id: string;
+  amount?: string;
 }
 
 export interface DndItem {

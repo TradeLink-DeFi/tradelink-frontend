@@ -148,6 +148,22 @@ const DndTrader = (dndProps: DndProps) => {
     }
   );
 
+  const { data: myFujiNfts, refetch: fujiRefetch } = useQuery(
+    query.GET_FUJI_BY_ADDRESS,
+    {
+      variables: { walletAddress: account?.address?.toLocaleLowerCase() ?? 0 },
+      context: { clientName: "fuji" },
+    }
+  );
+
+  const { data: myOptimismNfts, refetch: optimismRefetch } = useQuery(
+    query.GET_OPTIMISM_BY_ADDRESS,
+    {
+      variables: { walletAddress: account?.address?.toLocaleLowerCase() ?? 0 },
+      context: { clientName: "optimism" },
+    }
+  );
+
   useEffect(() => {
     if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
       const allNfts = [
@@ -163,16 +179,30 @@ const DndTrader = (dndProps: DndProps) => {
   }, [sepoliaNfts, mumbaiNfts, bscNfts, fujiNfts, optimismNfts]);
 
   useEffect(() => {
-    if (mySepoliaNfts && myMumbaiNfts && myBscNfts) {
+    // console.log("1_mySepoliaNfts", mySepoliaNfts);
+    // console.log("2_myMumbaiNfts", myMumbaiNfts);
+    // console.log("3_myBscNfts", myBscNfts);
+    // console.log("4_myFujiNfts", myFujiNfts);
+    // console.log("5_myOptimismNfts", myOptimismNfts);
+    if (
+      mySepoliaNfts &&
+      myMumbaiNfts &&
+      myBscNfts &&
+      myFujiNfts &&
+      myOptimismNfts
+    ) {
       const myNfts = [
         mySepoliaNfts?.users[0] ?? null,
         myMumbaiNfts?.users[0] ?? null,
         myBscNfts?.users[0] ?? null,
+        myFujiNfts?.users[0] ?? null,
+        myOptimismNfts?.users[0] ?? null,
       ];
+      console.log("myNfts", myNfts);
       handleFilterNft();
       setMyNftsData(myNfts);
     }
-  }, [mySepoliaNfts, myMumbaiNfts, myBscNfts]);
+  }, [mySepoliaNfts, myMumbaiNfts, myBscNfts, myFujiNfts, myOptimismNfts]);
 
   useEffect(() => {
     getChainFilterList().then((chain) => {
@@ -251,20 +281,34 @@ const DndTrader = (dndProps: DndProps) => {
   };
 
   const handleChangeCollection = async (collectionId: string) => {
+    console.log("collectionId", collectionId);
     const selectedCol = nftCollectionFilterList.filter(
       (col) => col.value == collectionId
     )[0];
     setSelectedCollection(selectedCol);
   };
 
+  const handleChangeChooseType = async (chooseType: ChooseType) => {
+    console.log("chooseType", chooseType);
+    setChooseType(chooseType);
+    handleFilterNft(chooseType);
+  };
+
   const handleAddToken = (token: TokenItem, amount: string) => {
     console.log("handleAddToken", token);
     console.log("handleAddToken", amount);
     console.log("isMyOffer", isMyOffer);
+    token.amount = amount;
     const newData = data;
     if (isMyOffer && newData[2].components) {
       newData[2].components = [...newData[2]?.components, token];
       setData(newData);
+      setMyOfferItems([...myOfferItems, token]);
+      setToggleDnd(!toggleDnd);
+    } else if (newData[1].components) {
+      newData[1].components = [...newData[1]?.components, token];
+      setData(newData);
+      setMyOfferItems([...myOfferItems, token]);
       setToggleDnd(!toggleDnd);
     }
   };
@@ -280,17 +324,34 @@ const DndTrader = (dndProps: DndProps) => {
   //   console.log("myOfferItems", myOfferItems);
   // }, [myOfferItems]);
 
-  const handleFilterNft = async () => {
+  const handleFilterNft = async (choose?: ChooseType) => {
     let myNftsFiltered: NFTItem[] | [];
     console.log("selectedChain", selectedChain);
     console.log("selectedCollection", selectedCollection);
+
     switch (selectedChain) {
       case "11155111":
         await sepoliaRefetch();
         if (selectedCollection?.label == "BadApe") {
-          myNftsFiltered = mySepoliaNfts?.users[0]?.badApeNfts;
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? mySepoliaNfts?.users[0]?.badApeNfts
+              : sepoliaNfts?.badApeNfts?.filter(
+                  (nft: NFTItem) =>
+                    !mySepoliaNfts?.users[0]?.badApeNfts?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
         } else if (selectedCollection?.label == "CyberBear") {
-          myNftsFiltered = mySepoliaNfts?.users[0]?.cyberBearNfts;
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? mySepoliaNfts?.users[0]?.cyberBearNfts
+              : await sepoliaNfts?.cyberBearNfts?.filter(
+                  (nft: NFTItem) =>
+                    !mySepoliaNfts?.users[0]?.cyberBearNfts?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
         } else {
           myNftsFiltered = [];
         }
@@ -298,7 +359,63 @@ const DndTrader = (dndProps: DndProps) => {
       case "80001":
         await mumbaiRefetch();
         if (selectedCollection?.label == "AstroDog") {
-          myNftsFiltered = myMumbaiNfts?.users[0]?.astroDogNft;
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? myMumbaiNfts?.users[0]?.astroDogNft
+              : await mumbaiNfts?.astroDogNfts?.filter(
+                  (nft: NFTItem) =>
+                    !myMumbaiNfts?.users[0]?.astroDogNft?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
+        } else {
+          myNftsFiltered = [];
+        }
+        break;
+      case "420":
+        await optimismRefetch();
+        if (selectedCollection?.label == "KoiCrap") {
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? myOptimismNfts?.users[0]?.koiCrapNft
+              : await optimismNfts?.koiCrapNfts?.filter(
+                  (nft: NFTItem) =>
+                    !myOptimismNfts?.users[0]?.koiCrapNft?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
+        } else {
+          myNftsFiltered = [];
+        }
+        break;
+      case "43113":
+        await fujiRefetch();
+        if (selectedCollection?.label == "Golem8bit") {
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? myFujiNfts?.users[0]?.golem8BitNft
+              : await fujiNfts?.golem8BitNfts?.filter(
+                  (nft: NFTItem) =>
+                    !myFujiNfts?.users[0]?.golem8BitNft?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
+        } else {
+          myNftsFiltered = [];
+        }
+        break;
+      case "97":
+        await bscRefetch();
+        if (selectedCollection?.label == "GoldenBull") {
+          myNftsFiltered =
+            (choose ?? chooseType) == ChooseType.MyItems
+              ? myBscNfts?.users[0]?.goldenBullNft
+              : await bscNfts?.goldenBullNfts?.filter(
+                  (nft: NFTItem) =>
+                    !myBscNfts?.users[0]?.goldenBullNft?.some(
+                      (my: NFTItem) => my.tokenId == nft.id
+                    )
+                );
         } else {
           myNftsFiltered = [];
         }
@@ -309,7 +426,7 @@ const DndTrader = (dndProps: DndProps) => {
         break;
     }
     if (myOfferItems?.length > 0) {
-      console.log("myOfferItems ss", myOfferItems);
+      console.log("##myOfferItems ss", myOfferItems);
       const result = myNftsFiltered?.filter(
         (item) =>
           !myOfferItems.some(
@@ -319,9 +436,10 @@ const DndTrader = (dndProps: DndProps) => {
               offerItem.id == item.id
           )
       );
-      console.log("result ::x ", result);
+      console.log("##result ::x ", result);
       myNftsFiltered = result;
     }
+    console.log("##myNftsFiltered ::x ", myNftsFiltered);
     setMyNftsFiltered(myNftsFiltered);
     return myNftsFiltered;
   };
@@ -542,9 +660,7 @@ const DndTrader = (dndProps: DndProps) => {
               <div className="w-8/12 h-full">
                 <div className="flex gap-2 pl-4">
                   <Button
-                    onClick={() => {
-                      setChooseType(ChooseType.MyItems);
-                    }}
+                    onClick={() => handleChangeChooseType(ChooseType.MyItems)}
                     className={cn(
                       "bg-white text-primary-600 font-semibold",
                       chooseType == ChooseType.MyItems &&
@@ -554,9 +670,9 @@ const DndTrader = (dndProps: DndProps) => {
                     {"All my items"}
                   </Button>
                   <Button
-                    onClick={() => {
-                      setChooseType(ChooseType.MarketItems);
-                    }}
+                    onClick={() =>
+                      handleChangeChooseType(ChooseType.MarketItems)
+                    }
                     className={cn(
                       "bg-white text-primary-600 font-semibold",
                       chooseType == ChooseType.MarketItems &&
@@ -712,12 +828,12 @@ const DndTrader = (dndProps: DndProps) => {
                                     <NftCard
                                       isMicro={false}
                                       nftItem={component}
-                                      chain={"polygon"}
+                                      chain={selectedChain}
                                     />
                                   ) : (
                                     <TokenCard
                                       item={component}
-                                      chain={""}
+                                      chain={selectedChain}
                                       isMicro={false}
                                     />
                                   )}
@@ -817,12 +933,12 @@ const DndTrader = (dndProps: DndProps) => {
                                         <NftCard
                                           isMicro={true}
                                           nftItem={component}
-                                          chain={"polygon"}
+                                          chain={selectedChain}
                                         />
                                       ) : (
                                         <TokenCard
                                           item={component}
-                                          chain={""}
+                                          chain={selectedChain}
                                           isMicro={true}
                                         />
                                       )}

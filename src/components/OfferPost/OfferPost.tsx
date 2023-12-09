@@ -17,8 +17,8 @@ export default function OfferPost({ data }: OfferPostProps) {
   };
 
   useEffect(() => {
-    handleGetEnsName("data.traderAddress[0].walletAddress");
-  }, []);
+    handleGetEnsName(data.traderAddress[0].walletAddress);
+  }, [data.traderAddress]);
 
   return (
     <div className="flex rounded-lg p-4 space-x-3 bg-white w-full border border-[#EEF0F1]">

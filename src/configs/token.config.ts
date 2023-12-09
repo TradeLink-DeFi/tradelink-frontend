@@ -9,7 +9,7 @@ export const chainPathMapping = (chainId: string | number) => {
     case "43113":
       return "/chains/fuji.png";
     case "97":
-      return "/chains/bsc.png";
+      return "/chains/binance.png";
     default:
       return "/";
   }

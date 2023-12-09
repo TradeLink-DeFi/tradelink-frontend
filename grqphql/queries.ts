@@ -98,7 +98,7 @@ export const GET_FUJI = gql`
 export const GET_FUJI_BY_ADDRESS = gql`
   query MyFuji($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      golem8BitNfts {
+      golem8bitNft {
         tokenId
         id
         contentURI
@@ -122,7 +122,7 @@ export const GET_OPTIMISM = gql`
 export const GET_OPTIMISM_BY_ADDRESS = gql`
   query MyOptimism($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      koiCrapNfts {
+      koiCrapNft {
         tokenId
         id
         contentURI
