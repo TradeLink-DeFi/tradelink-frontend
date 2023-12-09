@@ -18,9 +18,20 @@ export interface NFTItem {
   __typename: string;
 }
 
+export interface TokenItem {
+  decimals: number;
+  isActive: boolean;
+  name: string;
+  symbol: string;
+  tokenAddress: string;
+  type: string;
+  __v: number;
+  _id: string;
+}
+
 export interface DndItem {
   id: number;
   title: string;
   icon: string | undefined;
-  components: NFTItem[] | [];
+  components: NFTItem[] | TokenItem[] | [];
 }

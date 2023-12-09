@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Avatar, Divider, Image } from "@nextui-org/react";
-import { Item } from "@/interfaces/item.interface";
+import { Item, TokenItem } from "@/interfaces/item.interface";
 
 export const TokenCard = ({
   item,
   chain,
   isMicro,
 }: {
-  item: Item;
+  item: TokenItem;
   chain: string;
   isMicro: boolean;
 }) => {
