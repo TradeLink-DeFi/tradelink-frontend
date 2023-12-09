@@ -39,8 +39,9 @@ const useUserStore = create<userState>()(
         localStorage.clear();
       },
       authenticate: async () => {
-        axios.defaults.headers.common["Authorization"] = `Bearer ${get().accessToken
-          }`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${
+          get().accessToken
+        }`;
         await authService
           .me()
           .then((res) => {

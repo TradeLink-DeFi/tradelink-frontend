@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import { Avatar, Divider, Image } from "@nextui-org/react";
 import { Item, TokenItem } from "@/interfaces/item.interface";
+import { chainPathMapping } from "@/configs/chian.config";
+import { IToken } from "@/interfaces/offer.interface";
 
 export const TokenCard = ({
+  itemCache,
   item,
   chain,
-  isMicro,
+  isMicro = false,
 }: {
   item: TokenItem;
+  itemCache?: IToken & { amount: string };
   chain: string;
-  isMicro: boolean;
+  isMicro?: boolean;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -22,7 +26,7 @@ export const TokenCard = ({
   };
 
   const tokenImage = () => {
-    return "/next.svg";
+    return `/tokens/${item?.name ?? itemCache?.name}.png`;
   };
 
   return (
@@ -32,14 +36,16 @@ export const TokenCard = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <Avatar className="w-[60px] h-[60px]" src={tokenImage()} />
+        <Avatar className="w-[30px] h-[30px] mx-3 my-1" src={tokenImage()} />
         <div className="w-full h-1/6 border-t border-gray-300 flex justify-center items-center">
-          <p className="font-light pt-2 text-gray-600 text-sm">{item.name}</p>
+          <p className="font-light text-gray-600 text-xs px-1">
+            {itemCache?.amount}{" "}{item?.name ?? itemCache?.name}
+          </p>
         </div>
       </div>
       <Avatar
         className="absolute z-20 top-2 left-2 w-[15px] h-[15px]"
-        src={"/images/polygon.jpeg"}
+        src={chainPathMapping(chain)}
       />
     </div>
   );

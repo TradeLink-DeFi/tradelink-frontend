@@ -29,7 +29,7 @@ interface Nft {
   nftCollection: string;
 }
 
-export interface Token {
+export interface IToken {
   _id: string;
   tokenAddress: string;
   type: TokenType;
@@ -40,14 +40,34 @@ export interface Token {
   chain: string;
 }
 
+export interface OfferHistory {
+  _id: string;
+  createdAt: Date;
+  status: number;
+}
+
+export interface GroupedOfferHistory {
+  date: string;
+  offers: OfferHistory[];
+}
+
+interface ChainToken {
+  _id: string;
+  chainName: string;
+  chainId: string;
+  chainSelector: string;
+}
+
 export interface OfferResponse {
   _id: string;
-  tokenIn: Token[];
-  tokenOut: Token[];
+  tokenIn: IToken[];
+  tokenOut: IToken[];
+  tokenInAmount: string[];
+  tokenOutAmount: string[];
   nftIn: Nft[];
   nftOut: Nft[];
-  tokenAmountIn: string[];
-  tokenOutAmount: string[];
+  chainTokenIn: ChainToken[];
+  chainTokenOut: ChainToken[];
   status: OfferStatus;
   note: string;
   traderAddress: User[];
