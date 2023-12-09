@@ -1,10 +1,8 @@
-import { truncateString } from "@/utils/formatString.util";
 import { Button, Image } from "@nextui-org/react";
 import { OfferResponse } from "@/interfaces/offer.interface";
 import { convertTZ, diffDateMin } from "@/utils/date.util";
 import { NftCard } from "../NFT/NftCard";
 import { TokenCard } from "../NFT/TokenCard";
-import { useEnsName } from "wagmi";
 import { getEnsName } from "@/utils/ensname.util";
 import { useEffect, useState } from "react";
 interface OfferPostProps {
