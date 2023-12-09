@@ -4,12 +4,24 @@ import { OfferResponse } from "@/interfaces/offer.interface";
 import { convertTZ, diffDateMin } from "@/utils/date.util";
 import { NftCard } from "../NFT/NftCard";
 import { TokenCard } from "../NFT/TokenCard";
-
+import { useEnsName } from "wagmi";
+import { getEnsName } from "@/utils/ensname.util";
+import { useEffect, useState } from "react";
 interface OfferPostProps {
   data: OfferResponse;
 }
 
 export default function OfferPost({ data }: OfferPostProps) {
+  const [ensName, setEnsName] = useState("");
+
+  const handleGetEnsName = async (address: string) => {
+    setEnsName(await getEnsName(address));
+  };
+
+  useEffect(() => {
+    handleGetEnsName("data.traderAddress[0].walletAddress");
+  }, []);
+
   return (
     <div className="flex rounded-lg p-4 space-x-3 bg-white w-full border border-[#EEF0F1]">
       <div>
@@ -17,9 +29,7 @@ export default function OfferPost({ data }: OfferPostProps) {
       </div>
       <div className="space-y-3 w-full">
         <div className="flex space-x-2 items-center my-1">
-          <div className="font-semibold text-[#313235]">
-            {truncateString(data.traderAddress[0].walletAddress)}
-          </div>
+          <div className="font-semibold text-[#313235]">{ensName}</div>
           <Image src="/offers/verify.png" width={16} alt="Verify Badge" />
           <p className="text-sm font-light">
             {diffDateMin(convertTZ(data.createdAt))} min ago
@@ -46,7 +56,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             {data.tokenIn.map((token, key) => (
               <TokenCard
                 key={key}
-                itemCache={{ ...token, amount: data.tokenInAmount[key]}}
+                itemCache={{ ...token, amount: data.tokenInAmount[key] }}
                 chain={data.chainTokenIn[key].chainId}
               />
             ))}
@@ -72,7 +82,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             {data.tokenOut.map((token, key) => (
               <TokenCard
                 key={key}
-                itemCache={{ ...token, amount: data.tokenOutAmount[key]}}
+                itemCache={{ ...token, amount: data.tokenOutAmount[key] }}
                 chain={data.chainTokenOut[key].chainId}
               />
             ))}
