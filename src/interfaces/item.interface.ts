@@ -33,5 +33,5 @@ export interface DndItem {
   id: number;
   title: string;
   icon: string | undefined;
-  components: NFTItem[] | TokenItem[] | [];
+  components: (NFTItem | TokenItem)[] | [];
 }

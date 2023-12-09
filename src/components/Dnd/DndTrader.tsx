@@ -20,6 +20,7 @@ import {
   PaginationItemRenderProps,
   Textarea,
   Spinner,
+  useDisclosure,
 } from "@nextui-org/react";
 import { Search } from "lucide-react";
 import { ChevronIcon } from "@/constants/ChavronIcon";
@@ -34,6 +35,7 @@ import { useQuery } from "@apollo/client";
 import { useQuery as tanStackUseQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { useTokens } from "@/services/token.service";
+import { ERC20Modal } from "./ERC20Modal";
 
 enum ChooseType {
   MyItems,
@@ -66,6 +68,8 @@ interface SelectItemProps {
 }
 
 const DndTrader = (dndProps: DndProps) => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const myElementRef = useRef<HTMLDivElement>(null);
   const account = useAccount();
 
@@ -90,9 +94,12 @@ const DndTrader = (dndProps: DndProps) => {
     SelectItemProps[]
   >([]);
 
-  const [myOfferItems, setMyOfferItems] = useState<Array<NFTItem>>([]);
+  const [myOfferItems, setMyOfferItems] = useState<Array<NFTItem | TokenItem>>(
+    []
+  );
 
   const [toggleDnd, setToggleDnd] = useState<boolean>(false);
+  const [isMyOffer, setIsMyOffer] = useState<boolean>(false);
 
   const MAX_LINES = 5;
   const MAX_LENGTH = 200;
@@ -140,13 +147,6 @@ const DndTrader = (dndProps: DndProps) => {
       context: { clientName: "bsc" },
     }
   );
-
-  // getTokens
-  const {
-    data: tokenList,
-    isLoading,
-    error,
-  } = useTokens(selectedChain ?? "11155111");
 
   useEffect(() => {
     if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
@@ -207,11 +207,11 @@ const DndTrader = (dndProps: DndProps) => {
     console.log("myNftsFiltered", myNftsFiltered);
   }, [myNftsFiltered]);
 
-  useEffect(() => {
-    if (tokenList && tokenList?.length > 0 && itemType == ItemType.Tokens) {
-      console.log("token list :: ", tokenList);
-    }
-  }, [tokenList]);
+  // useEffect(() => {
+  //   if (tokenList && tokenList?.length > 0 && itemType == ItemType.Tokens) {
+  //     console.log("token list :: ", tokenList);
+  //   }
+  // }, [tokenList]);
 
   useEffect(() => {
     if (data) {
@@ -224,7 +224,7 @@ const DndTrader = (dndProps: DndProps) => {
         // setToggleDnd(!toggleDnd);
       }
     }
-  }, [data]);
+  }, [data, myOfferItems]);
 
   const getChainFilterList = async () => {
     const chains = await getChains();
@@ -257,10 +257,22 @@ const DndTrader = (dndProps: DndProps) => {
     setSelectedCollection(selectedCol);
   };
 
+  const handleAddToken = (token: TokenItem, amount: string) => {
+    console.log("handleAddToken", token);
+    console.log("handleAddToken", amount);
+    console.log("isMyOffer", isMyOffer);
+    const newData = data;
+    if (isMyOffer && newData[2].components) {
+      newData[2].components = [...newData[2]?.components, token];
+      setData(newData);
+      setToggleDnd(!toggleDnd);
+    }
+  };
+
   useEffect(() => {
     if (selectedChain || selectedCollection) {
       handleFilterNft();
-      handleFilterToken();
+      // handleFilterToken();
     }
   }, [selectedChain, selectedCollection]);
 
@@ -296,26 +308,40 @@ const DndTrader = (dndProps: DndProps) => {
         console.log("Invalid selectedChain");
         break;
     }
+    if (myOfferItems?.length > 0) {
+      console.log("myOfferItems ss", myOfferItems);
+      const result = myNftsFiltered?.filter(
+        (item) =>
+          !myOfferItems.some(
+            (offerItem) =>
+              isNFTItem(offerItem) &&
+              offerItem.__typename == item.__typename &&
+              offerItem.id == item.id
+          )
+      );
+      console.log("result ::x ", result);
+      myNftsFiltered = result;
+    }
     setMyNftsFiltered(myNftsFiltered);
     return myNftsFiltered;
   };
 
-  const handleFilterToken = async () => {
-    let myTokenFiltered: TokenItem[] | [];
-    console.log("selectedChain", selectedChain);
-    console.log("selectedCollection", selectedCollection);
-    console.log("tokenList", tokenList);
+  // const handleFilterToken = async () => {
+  //   let myTokenFiltered: TokenItem[] | [];
+  //   console.log("selectedChain", selectedChain);
+  //   console.log("selectedCollection", selectedCollection);
+  //   console.log("tokenList", tokenList);
 
-    if (tokenList && itemType == ItemType.Tokens) {
-      const newData = data;
-      if (newData[0]?.components) {
-        newData[0].components = [...tokenList];
-        console.log("newData", newData);
-        setData(newData);
-        setToggleDnd(!toggleDnd);
-      }
-    }
-  };
+  //   if (tokenList && itemType == ItemType.Tokens) {
+  //     const newData = data;
+  //     if (newData[0]?.components) {
+  //       newData[0].components = [...tokenList];
+  //       console.log("newData", newData);
+  //       setData(newData);
+  //       setToggleDnd(!toggleDnd);
+  //     }
+  //   }
+  // };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -425,13 +451,13 @@ const DndTrader = (dndProps: DndProps) => {
           {Array.from({ length: 10 }).map((_, index) => {
             if (droppableBg && droppableBg[index]) {
               console.log("droppableBg[index]", droppableBg[index]);
-              // return (
-              //   <OfferCard
-              //     key={index}
-              //     nftItem={droppableBg![index]}
-              //     chain={""}
-              //   />
-              // );
+              return (
+                <OfferCard
+                  key={index}
+                  nftItem={droppableBg![index]}
+                  chain={""}
+                />
+              );
             } else {
               return <BlankCard key={index} />;
             }
@@ -545,7 +571,7 @@ const DndTrader = (dndProps: DndProps) => {
                   <Divider />
                 </div>
 
-                <div className="flex gap-2 pl-4 items-center font-semibold">
+                {/* <div className="flex gap-2 pl-4 items-center font-semibold">
                   <p className=" text-sm">Select Type</p>
                   <p
                     onClick={() => handleChangeItemType(ItemType.NFTs)}
@@ -565,7 +591,7 @@ const DndTrader = (dndProps: DndProps) => {
                   >
                     Tokens
                   </p>
-                </div>
+                </div> */}
 
                 <div className="px-4 my-4 flex flex-row w-full gap-2 relative">
                   <Input
@@ -733,10 +759,14 @@ const DndTrader = (dndProps: DndProps) => {
                       key={index}
                       droppableId={`droppable-${index}`}
                       direction="horizontal"
+                      isDropDisabled={
+                        (chooseType == ChooseType.MyItems && val.id == 1) ||
+                        (chooseType == ChooseType.MarketItems && val.id == 2)
+                      }
                     >
                       {(provided) => (
                         <div
-                          className="p-5 min-h-[260px] w-full border border-gray-300 rounded-lg overflow-hidden relative"
+                          className="p-5 min-h-[280px] w-full border border-gray-300 rounded-lg overflow-hidden relative"
                           {...provided.droppableProps}
                           ref={provided.innerRef}
                         >
@@ -765,7 +795,8 @@ const DndTrader = (dndProps: DndProps) => {
                                   }
                                   draggableId={
                                     isNFTItem(component)
-                                      ? component.id.toString()
+                                      ? component.__typename +
+                                        component.id.toString()
                                       : component._id.toString()
                                   }
                                   index={index}
@@ -801,6 +832,17 @@ const DndTrader = (dndProps: DndProps) => {
                               ))}
                             </div>
                           }
+                          <Button
+                            size="sm"
+                            color="primary"
+                            className="absolute bottom-3 right-5"
+                            onClick={() => {
+                              setIsMyOffer(val.id == 2);
+                              onOpen();
+                            }}
+                          >
+                            Add ERC20 Token
+                          </Button>
                         </div>
                       )}
                     </Droppable>
@@ -813,7 +855,6 @@ const DndTrader = (dndProps: DndProps) => {
           </div>
         </div>
       </DndContext>
-
       {
         // Create offer section
         dndProps.isCreateOffer && (
@@ -856,6 +897,13 @@ const DndTrader = (dndProps: DndProps) => {
           </>
         )
       }
+      <ERC20Modal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onOpenChange={onOpenChange}
+        selectedChain={selectedChain}
+        handleAddToken={handleAddToken}
+      />
     </>
   ) : (
     <div className="flex min-h-[80vh] items-center justify-center">
