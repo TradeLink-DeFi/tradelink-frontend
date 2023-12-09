@@ -1,12 +1,27 @@
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import Multicallv3Abi from "@/constants/abis/multicall3.abi.json";
+import { useEffect, useMemo, useState } from "react";
+import { IUseMulticall, useMulticallRead } from "./multicall.hook";
+import { formatEther } from "viem";
+import { allowanceDecoder } from "@/services/contract/decoder.service";
+import { IAllowanceEncode } from "@/interfaces/encoder.interface";
+import { allowanceEncoder } from "@/services/contract/encoder.service";
 
-export const useAllowances = () => {
-  const { config } = usePrepareContractWrite({
-    address: "0xecb504d39723b0be0e3a9aa33d646642d1051ee1",
-    abi: Multicallv3Abi,
-    functionName: "aggregate",
+export const useAllowance = ({
+  chainId,
+}: IUseMulticall) => {
+  const [params, setParams] = useState<IAllowanceEncode[]>([]);
+
+  const paramEncoded = useMemo(() => allowanceEncoder(params), [params]);
+
+  const { data, isLoading, isSuccess, isError, refetch } = useMulticallRead({
+    chainId,
+    encoded: paramEncoded.allowanceEncodedParam || undefined,
   });
 
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+  const allowance = useMemo(() => {
+    return data && data[1].map((item: string, key: number) =>
+      formatEther(allowanceDecoder(item, paramEncoded.isErc20s[key]))
+    );
+  }, [data, paramEncoded.isErc20s]);
+
+  return { allowance, isLoading, isSuccess, isError, setParams, params, refetch };
 };
