@@ -110,6 +110,16 @@ export default function TradeById() {
           Trade Offer #{router.query.id}
         </p>
       </div>
+
+      {(offerData && allOfferItems) && (
+        <DndTrader
+          isCreateOffer={false}
+          offerItems={allOfferItems}
+          wantItems={allWantItems}
+          queryOfferId={offerId}
+        ></DndTrader>
+      )}
+
       {renderTrade()}
     </MainLayout>
   );
