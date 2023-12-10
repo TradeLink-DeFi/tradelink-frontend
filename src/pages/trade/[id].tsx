@@ -57,8 +57,6 @@ export default function TradeById() {
   const ownerAddress = account?.address?.toLocaleLowerCase();
 
   const renderTrade = () => {
-    console.log({ status, traderAddress, ownerAddress });
-
     if (status === 0 && traderAddress.walletAddress !== ownerAddress) {
       if (offerData && allOfferItems) {
         return (
@@ -69,11 +67,13 @@ export default function TradeById() {
           ></DndTrader>
         );
       }
+      return <div />;
     }
 
     if (traderAddress.walletAddress === ownerAddress) {
       return (
         <TradeView
+          offerData={offerData}
           offerItems={allWantItems}
           wantItems={allOfferItems}
           note={offerData?.node}
@@ -83,9 +83,10 @@ export default function TradeById() {
       );
     }
 
-    if (offerData?.fullFillAddress === ownerAddress) {
+    if (offerData?.fulfilledAddress.walletAddress === ownerAddress) {
       return (
         <TradeView
+          offerData={offerData}
           offerItems={allWantItems}
           wantItems={allOfferItems}
           note={offerData?.node}

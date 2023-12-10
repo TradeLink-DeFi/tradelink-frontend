@@ -4,16 +4,17 @@ import OfferStepOne from "../Stepper/traderStepper/offerStepOne";
 import OfferStepTwo from "../Stepper/traderStepper/offerStepTwo";
 import OfferStepThree from "../Stepper/traderStepper/offerStepThree";
 import OfferStepFour from "../Stepper/traderStepper/offerStepFour";
-
+import { IOffer } from "@/interfaces/offer.interface";
 interface IProps {
   step: number;
+  offerData: IOffer;
 }
 
-export default function TraderTradeView({ step }: IProps) {
+export default function TraderTradeView({ step, offerData }: IProps) {
   const renderStepper = () => {
     switch (step) {
       case 1:
-        return <OfferStepTwo />;
+        return <OfferStepTwo offerData={offerData} />;
       case 2:
         return <OfferStepThree />;
       case 3:

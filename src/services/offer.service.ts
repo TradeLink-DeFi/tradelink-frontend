@@ -120,10 +120,22 @@ const getOfferById = async (offerId: string) => {
   }
 };
 
+const updateOfferStatus = async (offerId: string, status: number) => {
+  try {
+    const { data } = await axios.patch(`/offer/${offerId}`, {
+      status: status,
+    });
+    return data;
+  } catch (error) {
+    console.log("updateOfferStatus error ", error);
+  }
+};
+
 export {
   createOffer,
   getOffers,
   getHistory,
   mapHistroyByDateGroup,
   getOfferById,
+  updateOfferStatus,
 };

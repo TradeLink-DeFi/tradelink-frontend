@@ -1,22 +1,67 @@
+import { useCreateOffer } from "@/hooks/offer.hook";
+import { IOffer } from "@/interfaces/offer.interface";
+import { createOfferEncoder } from "@/services/contract/encoder.service";
 import { truncateString } from "@/utils/formatString.util";
 import { Button } from "@nextui-org/react";
-import { useState } from "react";
-
-useState;
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { parseEther } from "viem";
+import { updateOfferStatus } from "@/services/offer.service";
+import toast from "react-hot-toast";
 
 type PropType = {
-  currentStep: string;
+  offerData: IOffer;
 };
 
-const OfferStepTwo = () => {
-  const [trady, setTrady] = useState(
-    "0xF72f6bE11bAE516a3Fa16B19c9d7988f4C1CDA42"
-  );
+const OfferStepTwo = ({ offerData }: PropType) => {
+  const [trady, setTrady] = useState(offerData.traderAddress.walletAddress);
   const tradyAddress = truncateString(trady);
+  const [isConfirmLoading, setConfirmLoading] = useState(false);
+  const { address } = useAccount();
+  const { write: createOffer, result } = useCreateOffer({});
 
   const handleClick = () => {
-    console.log("clicked");
+    console.log({ offerData });
+    setConfirmLoading(true);
+    const createOfferEncoded = createOfferEncoder({
+      tokenIn: offerData.tokenIn.map(
+        (token) => token.tokenAddress as `0x${string}`
+      ),
+      tokenInAmount: offerData.tokenInAmount.map((token) => parseEther(token)),
+      nftIn: offerData.nftIn.map((nft) => nft.nftAddress as `0x${string}`),
+      nftInId: offerData.nftIn.map((nft) => BigInt(nft.nftId)),
+      destSelectorOut: BigInt(""),
+      tokenOut: offerData.tokenOut.map(
+        (token) => token.tokenAddress as `0x${string}`
+      ),
+      tokenOutAmount: offerData.tokenOutAmount.map((token) =>
+        parseEther(token)
+      ),
+      nftOut: offerData.nftOut.map((nft) => nft.nftAddress as `0x${string}`),
+      nftOutId: offerData.nftOut.map((nft) => BigInt(nft.nftId)),
+      ownerOfferAddress: address || "0x0",
+      traderOfferAddress: offerData.fulfilledAddress
+        .walletAddress as `0x${string}`,
+      deadLine: BigInt(0),
+      fee: parseEther("5"),
+      feeAddress: "0x0000000000000000000000000000000000000000",
+      isSuccess: false,
+    });
+    createOffer({ args: [createOfferEncoded] });
   };
+
+  const handleUpdateStatus = async (result: { offerId: string }) => {
+    await updateOfferStatus(result.offerId, 2);
+    setConfirmLoading(false);
+    toast.success("Offer confirmed successfully");
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    if (result) {
+      handleUpdateStatus(result);
+    }
+  }, [result]);
 
   return (
     <>
