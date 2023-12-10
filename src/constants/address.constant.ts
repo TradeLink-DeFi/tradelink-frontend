@@ -22,7 +22,7 @@ export const CONTRACT_ADDRESS = {
     golem8bit: "0xf7F023d94E013De2239f9827BC242772763d1456",
   },
   97: {
-    multicall: "",
+    multicall: "0xcA11bde05977b3631167028862bE2a173976CA11",
     tradelink: "",
     goldenbull: "0xf7F023d94E013De2239f9827BC242772763d1456",
   },

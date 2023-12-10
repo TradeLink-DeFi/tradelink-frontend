@@ -13,7 +13,6 @@ import {
   createOfferEncoder,
   fulfillOfferEncoder,
 } from "@/services/contract/encoder.service";
-import { Address } from "viem";
 
 export default function test() {
   const { address } = useAccount();
@@ -21,7 +20,7 @@ export default function test() {
   const { data: feeOffer, setParams: setFeeOfferParam } = useGetFeeOffer({});
   const { data: feeFulfillOffer, setParams: setFeeFulfillOfferParam } =
     useGetFeeFulfillOffer({});
-  const { write: createOffer } = useCreateOffer({});
+  const { write: createOffer, result } = useCreateOffer({});
   const { write: fulfillOffer } = useFulfillOffer({});
 
   const handleAllowance = async () => {
@@ -56,14 +55,14 @@ export default function test() {
   const handleGetFeeFulfillOffer = async () => {
     console.log("start");
     const fulfillInfo = fulfillOfferEncoder({
-      offerId: BigInt('1'),
+      offerId: BigInt("1"),
       destChainSelector: BigInt("16015286601757825753"),
       destChainAddress: "0x6Cc3f2e4672FcB347c4878C4702df60048827072",
       tokenIn: [],
       tokenInAmount: [],
       nftIn: [],
       nftInId: [],
-      feeAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
+      feeAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB", // fulfill need to use link
       ownerFulfillAddress: "0x15Df80761aE0bE9E814dC75F996690cf028C4B62",
       traderFulfillAddress: "0xCc6c3917df90E5c4504dc611816c3CDCE033D2F0",
       isBridge: false,
@@ -79,17 +78,17 @@ export default function test() {
   };
   const handleCreateOffer = async () => {
     const createOfferEncoded = createOfferEncoder({
-      tokenIn: [],
-      tokenInAmount: [],
+      tokenIn: ["0x0993C192FB8C492bff799D7352D9B98F44aD81c5"],
+      tokenInAmount: [BigInt('1')],
       nftIn: [],
       nftInId: [],
       destSelectorOut: BigInt(""),
-      tokenOut: [],
-      tokenOutAmount: [],
+      tokenOut: ["0x1D892Efc7117F9bf3E64f55c2e00F9C8d1a9120A"],
+      tokenOutAmount: [BigInt('1')],
       nftOut: [],
       nftOutId: [],
-      ownerOfferAddress: "0x85b907c521b930E7b425A2e4Dd7DF01677dE1321",
-      traderOfferAddress: "0x15Df80761aE0bE9E814dC75F996690cf028C4B62",
+      ownerOfferAddress: "0xF72f6bE11bAE516a3Fa16B19c9d7988f4C1CDA42",
+      traderOfferAddress: "0x85b907c521b930E7b425A2e4Dd7DF01677dE1321",
       deadLine: BigInt(0),
       fee: BigInt(84942352680556055),
       feeAddress: "0x0000000000000000000000000000000000000000",
@@ -101,25 +100,27 @@ export default function test() {
   const handleFulfillOffer = async () => {
     console.log("start");
     const fulfillInfo = fulfillOfferEncoder({
-      offerId: BigInt('1'),
+      offerId: BigInt("22"),
       destChainSelector: BigInt("16015286601757825753"),
       destChainAddress: "0x6Cc3f2e4672FcB347c4878C4702df60048827072",
-      tokenIn: [],
-      tokenInAmount: [],
+      tokenIn: ["0x1D892Efc7117F9bf3E64f55c2e00F9C8d1a9120A"],
+      tokenInAmount: [BigInt("1")],
       nftIn: [],
       nftInId: [],
-      feeAddress: "0x0000000000000000000000000000000000000000",
+      feeAddress: "0x326C977E6efc84E512bB9C30f76E30c160eD06FB",
       ownerFulfillAddress: "0x85b907c521b930E7b425A2e4Dd7DF01677dE1321",
-      traderFulfillAddress: "0x15Df80761aE0bE9E814dC75F996690cf028C4B62",
-      isBridge: false,
+      traderFulfillAddress: "0xF72f6bE11bAE516a3Fa16B19c9d7988f4C1CDA42",
+      isBridge: true,
       isSuccess: false,
     });
+    console.log(fulfillInfo);
     fulfillOffer({ args: [fulfillInfo] });
   };
 
   console.log("allowance", allowance);
   console.log("getFee", feeOffer);
   console.log("getFeeFulfill", feeFulfillOffer);
+  console.log("create offer:", result);
   return (
     <MainLayout>
       <button onClick={() => handleAllowance()}>handleAllowance</button>

@@ -3,7 +3,6 @@ import {
   parseEther,
   Abi,
   encodeAbiParameters,
-  parseAbiParameters,
 } from "viem";
 
 import {
@@ -16,7 +15,6 @@ import {
 
 import ERC20Abi from "@/constants/abis/erc20.abi.json";
 import Nft721Abi from "@/constants/abis/nft721.abi.json";
-import TradeLinkV1 from "@/constants/abis/tradelinkv1.abi.json";
 
 export const multicallEncoder = (calls: Call[]) => {
   const callsEncoded = calls.map((call) => {
