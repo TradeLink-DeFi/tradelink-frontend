@@ -4,13 +4,15 @@ import { convertTZ, diffDateMin } from "@/utils/date.util";
 import { NftCard } from "../NFT/NftCard";
 import { TokenCard } from "../NFT/TokenCard";
 import { getEnsName } from "@/utils/ensname.util";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 interface OfferPostProps {
   data: OfferResponse;
 }
 
 export default function OfferPost({ data }: OfferPostProps) {
   const [ensName, setEnsName] = useState("");
+  const router = useRouter();
 
   const handleGetEnsName = async (address: string) => {
     setEnsName(await getEnsName(address));
@@ -92,6 +94,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             startContent={<Image src="/icons/trade.svg" alt="trade" />}
             color="primary"
             className="px-6"
+            onClick={() => router.push(`/trade/${data._id}`)}
           >
             Trade
           </Button>

@@ -173,12 +173,12 @@ export default function OfferPostModule() {
               {(chain) => (
                 <SelectItem key={chain.value} value={chain.value}>
                   <div className="flex gap-2">
-                  <Image
-                    src={`/chains/${chain.label}.png`}
-                    alt={chain.label}
-                    width={30}
-                    height={30}
-                  />
+                    <Image
+                      src={`/chains/${chain.label}.png`}
+                      alt={chain.label}
+                      width={30}
+                      height={30}
+                    />
                   </div>
                 </SelectItem>
               )}

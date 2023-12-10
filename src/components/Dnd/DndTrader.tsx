@@ -1,5 +1,5 @@
 "use client";
-
+import { getMetaData } from "@/services/metadata.service";
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
@@ -38,6 +38,9 @@ import { getApproved } from "@/services/contract/nft.service";
 import { LoadingModal } from "./LoadingModal";
 import { getAllowance } from "@/services/contract/erc20.service";
 import { getChainIdByCollection } from "@/configs/chian.config";
+import { INftItem, createOffer } from "@/services/offer.service";
+import { NFTMapper } from "@/constants/nftMapper";
+import { useRouter } from "next/router";
 
 enum ChooseType {
   MyItems,
@@ -690,8 +693,75 @@ const DndTrader = (dndProps: DndProps) => {
     setInputValue(inputValueLimited);
   };
 
-  const handleCreateOffer = () => {
+  const [creating, setCreating] = useState(false);
+
+  const router = useRouter();
+
+  const handleCreateOffer = async () => {
+    setCreating(true);
     if (data[1]?.components?.length > 0 && data[1]?.components?.length > 0) {
+      let tokenIn = [] as string[];
+      let tokenOut = [] as string[];
+      let tokenInAmount = [] as string[];
+      let tokenOutAmount = [] as string[];
+      let nftIn = [] as INftItem[];
+      let nftOut = [] as INftItem[];
+
+      for (const item of data[1].components) {
+        if (item && isTokenItem(item)) {
+          item.tokenAddress && tokenIn.push(item._id);
+          item.amount && tokenInAmount.push(item.amount);
+        } else if (item && isNFTItem(item)) {
+          const res = await getMetaData(item.contentURI);
+          item &&
+            nftIn.push({
+              nftId: item.tokenId,
+              nftAddress: NFTMapper[item.__typename].address,
+              name: item.__typename,
+              imageUrl: res?.data?.image,
+              nftCollection: NFTMapper[item.__typename].id,
+            });
+        }
+      }
+
+      for (let i = 0; i < data[2].components.length; i++) {
+        const item = data[2].components[i];
+        if (item && isTokenItem(item)) {
+          item.tokenAddress && tokenOut.push(item._id);
+          item.amount && tokenOutAmount.push(item.amount);
+        } else if (item && isNFTItem(item)) {
+          const res = await getMetaData(item.contentURI);
+          item &&
+            nftOut.push({
+              nftId: item.tokenId,
+              nftAddress: NFTMapper[item.__typename].address,
+              name: item.__typename,
+              imageUrl: res?.data?.image,
+              nftCollection: NFTMapper[item.__typename].id,
+            });
+        }
+      }
+
+      await createOffer({
+        tokenIn,
+        tokenOut,
+        tokenInAmount,
+        tokenOutAmount,
+        nftIn,
+        nftOut,
+        traderAddress: account?.address as `0x${string}`,
+        note: inputValue,
+        chainA: "65702ab5014714803a8dd795",
+        chainB: "65702b22014714803a8dd799",
+      })
+        .then((res: any) => {
+          setCreating(false);
+          router.push(`/trade/${res._id}`);
+        })
+        .catch((err) => {
+          console.log(err);
+          setCreating(false);
+        });
       console.log("have item");
     } else {
       console.log("dont have item");
@@ -1156,6 +1226,8 @@ const DndTrader = (dndProps: DndProps) => {
                 Cancel
               </Button>
               <Button
+                isLoading={creating}
+                disabled={creating}
                 onClick={handleCreateOffer}
                 className="w-1/12 bg-primary text-white border border-primary"
               >
