@@ -25,13 +25,19 @@ import {
 import { Search } from "lucide-react";
 import { ChevronIcon } from "@/constants/ChavronIcon";
 import { OfferCard } from "../NFT/OfferCard";
-import { DndItem, NFTItem, TokenItem } from "@/interfaces/item.interface";
+import {
+  DndItem,
+  NFTFromAPI,
+  NFTItem,
+  TokenItem,
+} from "@/interfaces/item.interface";
 import { TokenCard } from "../NFT/TokenCard";
 import { getChains } from "@/services/chain.service";
 import { getNftCollection } from "@/services/nftCollection.service";
 import * as query from "../../../grqphql/queries";
 import { InitialDnd } from "@/constants/initialDnd";
 import { useQuery } from "@apollo/client";
+import { useQuery as tanstackUseQuery } from "@tanstack/react-query";
 import { useAccount, useSwitchNetwork } from "wagmi";
 import { ERC20Modal } from "./ERC20Modal";
 import { getApproved } from "@/services/contract/nft.service";
@@ -65,6 +71,8 @@ const mockupOfferItemData = [
 
 interface DndProps {
   isCreateOffer: boolean;
+  offerItems?: (TokenItem | NFTItem)[];
+  wantItems?: (TokenItem | NFTItem)[];
 }
 
 interface SelectItemProps {
@@ -87,8 +95,9 @@ const DndTrader = (dndProps: DndProps) => {
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
   // const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
   const [data, setData] = useState<DndItem[] | []>([]);
-  const [offerItem, setOfferItem] =
-    useState<Array<NFTItem | TokenItem | null>>(mockupOfferItemData);
+  const [offerItem, setOfferItem] = useState<
+    Array<NFTItem | TokenItem | null> | []
+  >([]);
   const [droppableBg, setDroppableBg] =
     useState<Array<NFTItem | TokenItem | null>>();
   const [allNftsData, setAllNftsData] = useState<Array<Object>>();
@@ -178,21 +187,32 @@ const DndTrader = (dndProps: DndProps) => {
   );
 
   useEffect(() => {
+    if (dndProps.offerItems && !dndProps.isCreateOffer) {
+      setOfferItem(dndProps.offerItems);
+    }
+  }, [dndProps.offerItems]);
+
+  useEffect(() => {
+    if (dndProps.wantItems && !dndProps.isCreateOffer) {
+      const newData = data;
+      if (newData[1]?.components) {
+        newData[1].components = dndProps.wantItems;
+        setData(newData);
+        setToggleDnd(!toggleDnd);
+      }
+    }
+    if (dndProps.wantItems == undefined) {
+      const newData = data;
+      if (newData[1]?.components) {
+        newData[1].components = [];
+        setData(newData);
+        setToggleDnd(!toggleDnd);
+      }
+    }
+  }, [dndProps.wantItems]);
+
+  useEffect(() => {
     if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
-      // sepoliaNfts.chainId = 11155111;
-      // mumbaiNfts.chainId = 80001;
-      // fujiNfts.chainId = 43113;
-      // bscNfts.chainId = 97;
-      // optimismNfts.chainId = 420;
-
-      // const allNfts = [
-      //   { ...sepoliaNfts, chainId: "11155111" },
-      //   { ...mumbaiNfts, chainId: "80001" },
-      //   { ...bscNfts, chainId: "97" },
-      //   { ...fujiNfts, chainId: "43113" },
-      //   { ...optimismNfts, chainId: "420" },
-      // ];
-
       const allNfts = [
         sepoliaNfts,
         mumbaiNfts,
@@ -229,6 +249,8 @@ const DndTrader = (dndProps: DndProps) => {
 
   useEffect(() => {
     getChainFilterList().then((chain) => {
+      console.log("chainchain", chain);
+
       if (chain) {
         setChainFilterList(chain);
       }
@@ -279,6 +301,7 @@ const DndTrader = (dndProps: DndProps) => {
 
   const getChainFilterList = async () => {
     const chains = await getChains();
+    console.log("chains", chains);
     return chains?.map((chain) => ({
       label: chain.chainName,
       value: chain.chainId,
@@ -642,6 +665,10 @@ const DndTrader = (dndProps: DndProps) => {
     return item && typeof item.tokenAddress === "string";
   }
 
+  function isNFTFromApi(item: any): item is NFTFromAPI {
+    return item && typeof item.imageUrl === "string";
+  }
+
   const handleDroppableBg = () => {
     let offerArray = [...offerItem];
     const droppableItem = data[2]?.components || [];
@@ -658,13 +685,18 @@ const DndTrader = (dndProps: DndProps) => {
         // );
         const offerItemIndex = offerItem.findIndex((offer) => {
           if (offer) {
-            if (isNFTItem(offer) && isNFTItem(item)) {
+            if (isNFTFromApi(offer) && isNFTItem(item)) {
               return (
-                offer.tokenId == item.tokenId &&
-                offer.__typename == item.__typename
+                offer.nftId == item.tokenId &&
+                offer.nftAddress == NFTMapper[item.__typename].address
               );
             } else if (isTokenItem(offer) && isTokenItem(item)) {
-              return offer.tokenAddress === item.tokenAddress;
+              console.log("offer za", offer);
+              console.log("item za", item);
+              return (
+                offer.tokenAddress === item.tokenAddress &&
+                Number(offer.amount!) <= Number(item.amount!)
+              );
             }
           }
           return false;
@@ -783,13 +815,7 @@ const DndTrader = (dndProps: DndProps) => {
           {Array.from({ length: 10 }).map((_, index) => {
             if (droppableBg && droppableBg[index]) {
               console.log("droppableBg[index]", droppableBg[index]);
-              return (
-                <OfferCard
-                  key={index}
-                  nftItem={droppableBg![index]}
-                  chain={""}
-                />
-              );
+              return <OfferCard key={index} nftItem={droppableBg![index]} />;
             } else {
               return <BlankCard key={index} />;
             }
@@ -1126,32 +1152,26 @@ const DndTrader = (dndProps: DndProps) => {
                                       ? component.id
                                       : component._id
                                   }
-                                  draggableId={
-                                    isNFTItem(component)
-                                      ? component.__typename +
-                                        component.id.toString()
-                                      : component._id.toString()
-                                  }
+                                  draggableId={String(index)}
                                   index={index}
                                   isDragDisabled={true}
                                 >
                                   {(provided) => (
                                     <div
-                                      key={
-                                        isNFTItem(component)
-                                          ? component.id
-                                          : component._id
-                                      }
+                                      key={index}
                                       {...provided.dragHandleProps}
                                       {...provided.draggableProps}
                                       ref={provided.innerRef}
                                     >
-                                      {isNFTItem(component) ? (
+                                      {isNFTItem(component) ||
+                                      isNFTFromApi(component) ? (
                                         <NftCard
                                           isMicro={true}
                                           nftItem={component}
                                           chain={getChainIdByCollection(
-                                            component.__typename
+                                            isNFTItem(component)
+                                              ? component.__typename
+                                              : ""
                                           )}
                                         />
                                       ) : (

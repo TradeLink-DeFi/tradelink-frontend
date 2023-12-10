@@ -18,6 +18,14 @@ export interface NFTItem {
   __typename: string;
 }
 
+export interface NFTFromAPI {
+  imageUrl: string;
+  name: string;
+  nftAddress: string;
+  nftCollection: string;
+  nftId: string;
+}
+
 export interface TokenItem {
   decimals: number;
   isActive: boolean;
@@ -28,6 +36,7 @@ export interface TokenItem {
   __v: number;
   _id: string;
   amount?: string;
+  chain?: string;
 }
 
 export interface DndItem {
