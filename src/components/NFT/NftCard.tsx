@@ -44,8 +44,6 @@ export const NftCard = ({
     }
   }, [nftItem?.contentURI]);
 
-  console.log("chain", chain);
-
   return (
     <div className="rounded-lg">
       <div
