@@ -1,8 +1,10 @@
 import Head from "next/head";
 import MainLayout from "@/components/MainLayout/MainLayout";
-import DndTrader from "@/components/Dnd/DndTrader";
+import TradeView from "@/components/TradeView/TradeView";
+import { useRouter } from "next/router";
 
 export default function TradeById() {
+  const router = useRouter();
   return (
     <MainLayout>
       <Head>
@@ -13,10 +15,12 @@ export default function TradeById() {
         />
       </Head>
       <div className="w-full">
-        <p className="text-xl font-semibold text-left">Trade Offer</p>
+        <p className="text-xl font-semibold text-left">
+          Trade Offer #{router.query.id}
+        </p>
       </div>
-
-      <DndTrader isCreateOffer={false}></DndTrader>
+      {/* <DndTrader isCreateOffer={false}></DndTrader> */}
+      <TradeView />
     </MainLayout>
   );
 }
