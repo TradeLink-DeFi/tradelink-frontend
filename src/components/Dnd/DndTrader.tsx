@@ -298,10 +298,26 @@ const DndTrader = (dndProps: DndProps) => {
     useSwitchNetwork();
 
   useEffect(() => {
-    if (selectedChain) {
+    if (selectedChain && chooseType == ChooseType.MyItems) {
       switchNetwork?.(Number(selectedChain) ?? 11155111);
+      const newData = data;
+      if (newData[2]?.components) {
+        newData[2].components = [];
+        setData(newData);
+        setMyOfferItems([]);
+      }
+      handleFilterNft();
     }
-  }, [selectedChain]);
+    if (selectedChain && chooseType == ChooseType.MarketItems) {
+      const newData = data;
+      if (newData[1]?.components) {
+        newData[1].components = [];
+        setData(newData);
+        setOfferWantItems([]);
+      }
+      handleFilterNft();
+    }
+  }, [selectedChain, chooseType]);
 
   const handleChangeChain = async (chainId: string) => {
     setSelectedChain(chainId);
