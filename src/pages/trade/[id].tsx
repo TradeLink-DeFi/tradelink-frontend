@@ -59,7 +59,7 @@ export default function TradeById() {
         </p>
       </div>
 
-      {offerData && allOfferItems && (
+      {(offerData && allOfferItems) && (
         <DndTrader
           isCreateOffer={false}
           offerItems={allOfferItems}

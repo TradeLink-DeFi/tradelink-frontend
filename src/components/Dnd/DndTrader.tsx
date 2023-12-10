@@ -58,17 +58,6 @@ enum ItemType {
   Tokens,
 }
 
-const mockupOfferItemData = [
-  {
-    contentURI:
-      "https://ipfs.filebase.io/ipfs/QmVDX4qk6vDW6LysYCo8zuGbLMESeWhPCHtG4EPKPUDTC2",
-    createdAtTimestamp: "1701422328",
-    id: "0",
-    tokenId: "0",
-    __typename: "BadApeNft",
-  },
-];
-
 interface DndProps {
   isCreateOffer: boolean;
   offerItems?: (TokenItem | NFTItem)[];
@@ -187,29 +176,31 @@ const DndTrader = (dndProps: DndProps) => {
   );
 
   useEffect(() => {
-    if (dndProps.offerItems && !dndProps.isCreateOffer) {
-      setOfferItem(dndProps.offerItems);
+    console.log("__dndProps.isCreateOffer", dndProps.isCreateOffer);
+    if (dndProps.isCreateOffer) {
+      console.log("__if");
+      setOfferItem([]);
+      setOfferWantItems([]);
+      setToggleDnd(!toggleDnd);
+    } else {
+      console.log("__else");
+      if (dndProps.wantItems && !dndProps.isCreateOffer) {
+        console.log("__dndProps.wantItems", dndProps.wantItems);
+        setOfferWantItems(dndProps.wantItems);
+      }
+      if (dndProps.offerItems && !dndProps.isCreateOffer) {
+        console.log("__dndProps.offerItems", dndProps.offerItems);
+        setOfferItem(dndProps.offerItems);
+      }
+      setToggleDnd(!toggleDnd);
     }
-  }, [dndProps.offerItems]);
+  }, [dndProps]);
 
-  useEffect(() => {
-    if (dndProps.wantItems && !dndProps.isCreateOffer) {
-      const newData = data;
-      if (newData[1]?.components) {
-        newData[1].components = dndProps.wantItems;
-        setData(newData);
-        setToggleDnd(!toggleDnd);
-      }
-    }
-    if (dndProps.wantItems == undefined) {
-      const newData = data;
-      if (newData[1]?.components) {
-        newData[1].components = [];
-        setData(newData);
-        setToggleDnd(!toggleDnd);
-      }
-    }
-  }, [dndProps.wantItems]);
+  // useEffect(() => {
+  //   if (dndProps.offerItems && !dndProps.isCreateOffer) {
+  //     setOfferItem(dndProps.offerItems);
+  //   }
+  // }, [dndProps.isCreateOffer]);
 
   useEffect(() => {
     if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
@@ -287,16 +278,17 @@ const DndTrader = (dndProps: DndProps) => {
   useEffect(() => {
     if (data) {
       handleDroppableBg();
-      const newData = data;
       if (data[2]?.components && myOfferItems?.length > 0) {
         data[2].components = [...myOfferItems];
-        setData(newData);
+        setData(data);
       }
       if (data[1]?.components && offerWantItems?.length > 0) {
         data[1].components = [...offerWantItems];
-        setData(newData);
+        setData(data);
+        setToggleDnd(!toggleDnd);
       }
     }
+    console.log("__data", data);
   }, [data, myOfferItems, offerWantItems]);
 
   const getChainFilterList = async () => {
@@ -800,6 +792,10 @@ const DndTrader = (dndProps: DndProps) => {
     }
   };
 
+  const handleAcceptOffer = () => {
+    // accept offer
+  };
+
   const MyItemDropableBg = () => (
     <div className={cn(`absolute pr-[20px] grid grid-cols-6 gap-4 z-0`)}>
       {Array.from({ length: 18 }).map((_, index) => (
@@ -909,18 +905,20 @@ const DndTrader = (dndProps: DndProps) => {
                   >
                     {"All my items"}
                   </Button>
-                  <Button
-                    onClick={() =>
-                      handleChangeChooseType(ChooseType.MarketItems)
-                    }
-                    className={cn(
-                      "bg-white text-primary-600 font-semibold",
-                      chooseType == ChooseType.MarketItems &&
-                        "bg-primary text-white font-semibold"
-                    )}
-                  >
-                    {"Items on the market"}
-                  </Button>
+                  {dndProps.isCreateOffer && (
+                    <Button
+                      onClick={() =>
+                        handleChangeChooseType(ChooseType.MarketItems)
+                      }
+                      className={cn(
+                        "bg-white text-primary-600 font-semibold",
+                        chooseType == ChooseType.MarketItems &&
+                          "bg-primary text-white font-semibold"
+                      )}
+                    >
+                      {"Items on the market"}
+                    </Button>
+                  )}
                 </div>
 
                 <div className="px-4 py-3">
@@ -1042,16 +1040,8 @@ const DndTrader = (dndProps: DndProps) => {
                         >
                           {data[0]?.components?.map((component, index) => (
                             <Draggable
-                              key={
-                                isNFTItem(component)
-                                  ? component.id
-                                  : component._id
-                              }
-                              draggableId={
-                                isNFTItem(component)
-                                  ? component.id.toString()
-                                  : component._id.toString()
-                              }
+                              key={index}
+                              draggableId={"myItem" + index}
                               index={index}
                             >
                               {(provided) => (
@@ -1255,6 +1245,24 @@ const DndTrader = (dndProps: DndProps) => {
               </Button>
             </div>
           </>
+        )
+      }
+      {
+        // Create offer section
+        !dndProps.isCreateOffer && (
+          <div className="w-full flex flex-row justify-end gap-4">
+            <Button className="w-1/12 bg-white text-primary border border-primary">
+              Cancel
+            </Button>
+            <Button
+              // isLoading={creating}
+              // disabled={creating}
+              onClick={handleAcceptOffer}
+              className="w-1/12 bg-primary text-white border border-primary"
+            >
+              Accept
+            </Button>
+          </div>
         )
       }
       <ERC20Modal
