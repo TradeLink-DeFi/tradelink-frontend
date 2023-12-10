@@ -46,7 +46,7 @@ export default function TradeById() {
 
   return (
     <MainLayout>
-      <Head>
+      {/* <Head>
         <title>TradeLink | Trade</title>
         <meta
           name="viewport"
@@ -65,9 +65,13 @@ export default function TradeById() {
           offerItems={allOfferItems}
           wantItems={allWantItems}
         ></DndTrader>
-      )}
+      )} */}
 
-      {/* <TradeView /> */}
+      <TradeView
+        offerItems={allWantItems}
+        wantItems={allOfferItems}
+        note={offerData?.node}
+      />
     </MainLayout>
   );
 }
