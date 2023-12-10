@@ -12,8 +12,10 @@ interface IProps {
 export default function TraderTradeView({ step }: IProps) {
   const renderStepper = () => {
     switch (step) {
-      case 2:
+      case 1:
         return <OfferStepTwo />;
+      case 2:
+        return <OfferStepThree />;
       case 3:
         return <OfferStepThree />;
       case 4:

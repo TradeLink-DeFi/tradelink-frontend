@@ -14,6 +14,7 @@ import {
   MoreHorizontal,
   Trash2,
 } from "lucide-react";
+import { useRouter } from "next/router";
 import { useMemo } from "react";
 
 interface OfferHistoryItemProps {
@@ -21,6 +22,8 @@ interface OfferHistoryItemProps {
 }
 
 export default function OfferHistoryItem({ data }: OfferHistoryItemProps) {
+  const router = useRouter();
+
   // export enum OfferStatus {
   //   CREATE_OFFER_A = 0,
   //   ACCEPT_B = 1,
@@ -32,7 +35,7 @@ export default function OfferHistoryItem({ data }: OfferHistoryItemProps) {
   //   FAILED = 7,
   // }
   const status = useMemo(() => {
-    switch (data.status) {        
+    switch (data.status) {
       case 4:
         return <div>Completed</div>;
       case 5:
@@ -60,7 +63,10 @@ export default function OfferHistoryItem({ data }: OfferHistoryItemProps) {
             </DropdownTrigger>
             <DropdownMenu aria-label="Static Actions">
               <DropdownItem key="view">
-                <div className="flex items-center">
+                <div
+                  onClick={() => router.push(`/trade/${data._id}`)}
+                  className="flex items-center"
+                >
                   <Eye />
                   View Details
                 </div>

@@ -10,11 +10,8 @@ const OfferStepFour = () => {
           <div className="w-[3px] h-[100px] bg-[#385BD2] flex justify-center items-center rounded-md" />
         </div>
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px] mt-2">
-          <div className="text-sm font-semibold">Waiting</div>
-          <div className="mt-2 text-sm">
-            Please wait for people to trade your offer and press
-          </div>
-          <div className="text-sm">Accept.</div>
+          <div className="text-sm font-semibold">Offer Accepted</div>
+          <div className="mt-2 text-sm">This trade has been accepted.</div>
         </div>
       </div>
 
@@ -27,8 +24,8 @@ const OfferStepFour = () => {
           <div className="w-[3px] h-[100px] bg-[#385BD2] flex justify-center items-center rounded-md" />
         </div>
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px]">
-          <div className="text-sm font-semibold">Pending</div>
-          <div className="mt-2 text-sm">{"This step has been confirmed"}</div>
+          <div className="text-sm font-semibold">Confirmed</div>
+          <div className="mt-2 text-sm">Tradee has confirmed the offer.</div>
         </div>
       </div>
 
@@ -42,8 +39,10 @@ const OfferStepFour = () => {
         </div>
 
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px]">
-          <div className="text-sm font-semibold">Waiting</div>
-          <div className="mt-2 text-sm">{"The transaction is confirmed"}</div>
+          <div className="text-sm font-semibold">Transaction Confirmed</div>
+          <div className="mt-2 text-sm">
+            {"The transaction has already been confirmed"}
+          </div>
         </div>
       </div>
 
