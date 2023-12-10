@@ -1,3 +1,4 @@
+// *** Deprecated ***
 import { useCallback } from "react";
 import { useMulticallWrite } from "./multicall.hook";
 import { IApporveEncode } from "@/interfaces/encoder.interface";

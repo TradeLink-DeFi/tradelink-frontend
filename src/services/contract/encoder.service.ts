@@ -1,11 +1,22 @@
 import {
+  encodeFunctionData,
+  parseEther,
+  Abi,
+  encodeAbiParameters,
+  parseAbiParameters,
+} from "viem";
+
+import {
   Call,
   IAllowanceEncode,
   IApporveEncode,
+  ICreateOfferEncode,
+  IFulfillOffer,
 } from "@/interfaces/encoder.interface";
-import { encodeFunctionData, parseEther, Abi } from "viem";
+
 import ERC20Abi from "@/constants/abis/erc20.abi.json";
 import Nft721Abi from "@/constants/abis/nft721.abi.json";
+import TradeLinkV1 from "@/constants/abis/tradelinkv1.abi.json";
 
 export const multicallEncoder = (calls: Call[]) => {
   const callsEncoded = calls.map((call) => {
@@ -23,8 +34,7 @@ export const multicallEncoder = (calls: Call[]) => {
   return callsEncoded;
 };
 
-// Note: to -> the person is approved
-// isERC20 -> if true is erc20, other is nft
+// *** Deprecated ***
 export const approveEncoder = (approveParams: IApporveEncode[]) => {
   const isERC20s: boolean[] = [];
   const approveParamFormat: Call[] = approveParams.map((item) => {
@@ -63,4 +73,130 @@ export const allowanceEncoder = (allowanceParams: IAllowanceEncode[]) => {
   });
   const allowanceEncodedParam = multicallEncoder(allowanceParamFormat);
   return { allowanceEncodedParam, isErc20s };
+};
+
+// --- Note -------------
+// in -> chain offer created
+// out -> chain offer fulfilled
+export const createOfferEncoder = (createOfferParams: ICreateOfferEncode) => {
+  const {
+    tokenIn,
+    tokenInAmount,
+    nftIn,
+    nftInId,
+    destSelectorOut, // default -> ""
+    tokenOut,
+    tokenOutAmount,
+    nftOut,
+    nftOutId,
+    ownerOfferAddress,
+    traderOfferAddress,
+    deadLine, // current date [now]
+    fee,
+    feeAddress, // 0x00000000000000000000000000000000000000
+    isSuccess, // default -> false
+  } = createOfferParams;
+
+  const createOfferEncoded = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        name: "Offer",
+        components: [
+          { name: "tokenIn", type: "address[]" },
+          { name: "tokenInAmount", type: "uint256[]" },
+          { name: "nftIn", type: "address[]" },
+          { name: "nftInId", type: "uint256[]" },
+          { name: "destSelectorOut", type: "uint256" },
+          { name: "tokenOut", type: "address[]" },
+          { name: "tokenOutAmount", type: "uint256[]" },
+          { name: "nftOut", type: "address[]" },
+          { name: "nftOutId", type: "uint256[]" },
+          { name: "ownerOfferAddress", type: "address" },
+          { name: "traderOfferAddress", type: "address" },
+          { name: "deadLine", type: "uint256" },
+          { name: "fee", type: "uint256" },
+          { name: "feeAddress", type: "address" },
+          { name: "isSuccess", type: "bool" },
+        ],
+      },
+    ],
+    [
+      {
+        tokenIn,
+        tokenInAmount,
+        nftIn,
+        nftInId,
+        destSelectorOut,
+        tokenOut,
+        tokenOutAmount,
+        nftOut,
+        nftOutId,
+        ownerOfferAddress,
+        traderOfferAddress,
+        deadLine,
+        fee,
+        feeAddress,
+        isSuccess,
+      },
+    ]
+  );
+  return createOfferEncoded;
+};
+
+export const fulfillOfferEncoder = (fulfillOfferParams: IFulfillOffer) => {
+  const {
+    offerId,
+    destChainSelector,
+    destChainAddress,
+    tokenIn,
+    tokenInAmount,
+    nftIn,
+    nftInId,
+    feeAddress,
+    ownerFulfillAddress,
+    traderFulfillAddress,
+    isBridge,
+    isSuccess,
+  } = fulfillOfferParams;
+
+  const fulfillOfferEncoded = encodeAbiParameters(
+    [
+      {
+        type: "tuple",
+        name: "FulFillOffer",
+        components: [
+          { name: "offerId", type: "uint256" },
+          { name: "destChainSelector", type: "uint64" },
+          { name: "destChainAddress", type: "address"},
+          { name: "tokenIn", type: "address[]" },
+          { name: "tokenInAmount", type: "uint256[]" },
+          { name: "nftIn", type: "address[]" },
+          { name: "nftInId", type: "uint256[]" },
+          { name: "feeAddress", type: "address" },
+          { name: "ownerFulfillAddress", type: "address" },
+          { name: "traderFulfillAddress", type: "address" },
+          { name: "isBridge", type: "bool" },
+          { name: "isSuccess", type: "bool" },
+        ],
+      },
+    ],
+    [
+      {
+        offerId,
+        destChainSelector,
+        destChainAddress,
+        tokenIn,
+        tokenInAmount,
+        nftIn,
+        nftInId,
+        feeAddress,
+        ownerFulfillAddress,
+        traderFulfillAddress,
+        isBridge,
+        isSuccess,
+      },
+    ]
+  );
+  return fulfillOfferEncoded;
 };
