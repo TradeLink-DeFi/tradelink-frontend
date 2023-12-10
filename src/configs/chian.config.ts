@@ -14,3 +14,22 @@ export const chainPathMapping = (chainId: string | number) => {
       return "/";
   }
 };
+
+export const getChainIdByCollection = (typename: string) => {
+  switch (typename) {
+    case "BadApeNft":
+      return "11155111";
+    case "CyberBearNft":
+      return "11155111";
+    case "AstroDogNft":
+      return "80001";
+    case "GoldenBullNft":
+      return "97";
+    case "Golem8bitNft":
+      return "43113";
+    case "KoiCrapNft":
+      return "420";
+    default:
+      return "/";
+  }
+};

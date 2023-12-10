@@ -37,6 +37,7 @@ import { ERC20Modal } from "./ERC20Modal";
 import { getApproved } from "@/services/contract/nft.service";
 import { LoadingModal } from "./LoadingModal";
 import { getAllowance } from "@/services/contract/erc20.service";
+import { getChainIdByCollection } from "@/configs/chian.config";
 
 enum ChooseType {
   MyItems,
@@ -175,6 +176,20 @@ const DndTrader = (dndProps: DndProps) => {
 
   useEffect(() => {
     if (sepoliaNfts && mumbaiNfts && bscNfts && fujiNfts && optimismNfts) {
+      // sepoliaNfts.chainId = 11155111;
+      // mumbaiNfts.chainId = 80001;
+      // fujiNfts.chainId = 43113;
+      // bscNfts.chainId = 97;
+      // optimismNfts.chainId = 420;
+
+      // const allNfts = [
+      //   { ...sepoliaNfts, chainId: "11155111" },
+      //   { ...mumbaiNfts, chainId: "80001" },
+      //   { ...bscNfts, chainId: "97" },
+      //   { ...fujiNfts, chainId: "43113" },
+      //   { ...optimismNfts, chainId: "420" },
+      // ];
+
       const allNfts = [
         sepoliaNfts,
         mumbaiNfts,
@@ -182,6 +197,7 @@ const DndTrader = (dndProps: DndProps) => {
         fujiNfts,
         optimismNfts,
       ];
+
       console.log("allNfts", allNfts);
       setAllNftsData(allNfts);
     }
@@ -941,7 +957,9 @@ const DndTrader = (dndProps: DndProps) => {
                                     <NftCard
                                       isMicro={false}
                                       nftItem={component}
-                                      chain={selectedChain}
+                                      chain={getChainIdByCollection(
+                                        component.__typename
+                                      )}
                                     />
                                   ) : (
                                     <TokenCard
@@ -1046,7 +1064,9 @@ const DndTrader = (dndProps: DndProps) => {
                                         <NftCard
                                           isMicro={true}
                                           nftItem={component}
-                                          chain={selectedChain}
+                                          chain={getChainIdByCollection(
+                                            component.__typename
+                                          )}
                                         />
                                       ) : (
                                         <TokenCard
