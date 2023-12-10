@@ -1,9 +1,15 @@
 import { useMemo, useState } from "react";
 import { formatEther, Abi } from "viem";
-import { useNetwork, useContractRead, useContractWrite } from "wagmi";
+import {
+  useNetwork,
+  useContractRead,
+  useContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 
 import { contractAddressByChainId } from "@/configs/contract.config";
 import TradeLinkCCIPV1 from "@/constants/abis/tradelinkv1.abi.json";
+import { createOrderLogDecoder } from "@/services/contract/decoder.service";
 
 interface IUseGetFeeOfferParams {
   fulfillOfferId: string;
@@ -39,7 +45,7 @@ export const useGetFeeOffer = ({ chainId }: { chainId?: string }) => {
   } = useContractRead({
     address:
       contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
-        ?.tradeLinkCCIPV1 || "",
+        ?.tradelink || "",
     abi: TradeLinkCCIPV1 as Abi,
     functionName: "getFeeOffer",
     args: [
@@ -97,7 +103,7 @@ export const useGetFeeFulfillOffer = ({ chainId }: { chainId?: string }) => {
   } = useContractRead({
     address:
       contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
-        ?.tradeLinkCCIPV1 || "",
+        ?.tradelink || "",
     abi: TradeLinkCCIPV1 as Abi,
     functionName: "getFeeFulfillOffer",
     args: [[step, offerId, fulfillOfferId, fulfillInfo]],
@@ -126,15 +132,34 @@ export const useGetFeeFulfillOffer = ({ chainId }: { chainId?: string }) => {
 export const useCreateOffer = ({ chainId }: { chainId?: string }) => {
   const { chain } = useNetwork();
 
-  const { data, isLoading, isSuccess, isError, write } = useContractWrite({
+  console.log(
+    chainId ?? chain?.id.toString() ?? "",
+    contractAddressByChainId(chainId ?? chain?.id.toString() ?? ""),
+    contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
+      ?.tradelink || ""
+  );
+
+  const { data: _data, write } = useContractWrite({
     address:
       contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
-        ?.tradeLinkCCIPV1 || "",
+        ?.tradelink || "",
     abi: TradeLinkCCIPV1 as Abi,
     functionName: "createOffer",
   });
 
-  return { data, isLoading, isSuccess, isError, write };
+  const { data, isError, isLoading, isSuccess } = useWaitForTransaction({
+    hash: _data?.hash,
+  });
+
+  const result = useMemo(() => {
+    const length = data?.logs.length;
+    if (length && data?.logs[length - 1]) {
+      return createOrderLogDecoder(data.logs[length - 1].topics as [], data.logs[length - 1].data);
+    }
+    return null;
+  }, [data]);
+
+  return { result, isLoading, isSuccess, isError, write };
 };
 
 // fulfillOffer - test - demo
@@ -145,11 +170,10 @@ export const useFulfillOffer = ({ chainId }: { chainId?: string }) => {
   const { data, isLoading, isSuccess, isError, write } = useContractWrite({
     address:
       contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
-        ?.tradeLinkCCIPV1 || "",
+        ?.tradelink || "",
     abi: TradeLinkCCIPV1 as Abi,
     functionName: "fulfillOffer",
   });
 
   return { data, isLoading, isSuccess, isError, write };
 };
-
