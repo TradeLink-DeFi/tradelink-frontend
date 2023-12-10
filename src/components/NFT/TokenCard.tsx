@@ -26,8 +26,7 @@ export const TokenCard = ({
       <div className="h-full flex flex-col justify-around items-center pt-2">
         <Image className={cn("w-[30px] h-[30px]")} src={tokenImage()} alt="" />
         <p className={cn(" text-gray-600 text-xs", isMicro && "text-[10px]")}>
-          {formatAmount(item?.amount ?? "0") ??
-            formatAmount(itemCache?.amount ?? "0")}
+          {formatAmount(item?.amount ?? itemCache?.amount ?? "0")}
         </p>
         {/* <div className="border-b border-gray-300 w-full"></div> */}
         <p
