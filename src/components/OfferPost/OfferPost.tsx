@@ -41,7 +41,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             <Image src="/offers/IHave.png" width={16} alt="IHave Badge" />
             <p className="text-[#313235] text-base font-semibold">I want</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 items-center">
             {data.nftIn.map((nft, key) => (
               <NftCard
                 key={key}
@@ -54,11 +54,12 @@ export default function OfferPost({ data }: OfferPostProps) {
               />
             ))}
             {data.tokenIn.map((token, key) => (
+              <div key={key} className="w-20">
               <TokenCard
-                key={key}
                 itemCache={{ ...token, amount: data.tokenInAmount[key] }}
                 chain={data.chainTokenIn[key].chainId}
               />
+              </div>
             ))}
           </div>
           <hr className="w-full" />
