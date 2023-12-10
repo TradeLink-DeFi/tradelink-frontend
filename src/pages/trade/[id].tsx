@@ -72,11 +72,27 @@ export default function TradeById() {
     }
 
     if (traderAddress.walletAddress === ownerAddress) {
-      return <TradeView isTrader={true} step={status} />;
+      return (
+        <TradeView
+          offerItems={allWantItems}
+          wantItems={allOfferItems}
+          note={offerData?.node}
+          isTrader={true}
+          step={status}
+        />
+      );
     }
 
     if (offerData?.fullFillAddress === ownerAddress) {
-      return <TradeView isTrader={false} step={status} />;
+      return (
+        <TradeView
+          offerItems={allWantItems}
+          wantItems={allOfferItems}
+          note={offerData?.node}
+          isTrader={false}
+          step={status}
+        />
+      );
     }
   };
 
