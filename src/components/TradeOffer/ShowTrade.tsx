@@ -45,7 +45,7 @@ export function ShowTradeOffer({
       <div className=" w-full p-6 border-1 border-gray-200 rounded-2xl min-h-[350px]">
         <div className="flex align-middle">
           <Image
-            src="/offers/IWant.png"
+            src="/offers/iWant.png"
             width={30}
             height={30}
             alt="IWant Badge"
@@ -80,7 +80,7 @@ export function ShowTradeOffer({
       <div className=" w-full p-6 border-1 border-gray-200 rounded-2xl min-h-[350px]">
         <div className="flex flex-wrap">
           <Image
-            src="/offers/IHave.png"
+            src="/offers/iHave.png"
             width={30}
             height={30}
             alt="IWant Badge"
@@ -104,12 +104,6 @@ export function ShowTradeOffer({
               <BlankCard key={index} />
             ))}
           </div>
-        </div>
-      </div>
-      <div className="mt-5">
-        <h1 className="font-bold">Offer Details</h1>
-        <div className="p-1 text-gray-400">
-          <p>{offerDetail || "-asdasdasdwawdas"}</p>
         </div>
       </div>
     </>
