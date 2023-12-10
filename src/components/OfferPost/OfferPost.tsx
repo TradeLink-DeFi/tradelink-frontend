@@ -17,7 +17,7 @@ export default function OfferPost({ data }: OfferPostProps) {
   };
 
   useEffect(() => {
-    handleGetEnsName(data.traderAddress[0].walletAddress);
+    handleGetEnsName(data.traderAddress[0].walletAddress || "");
   }, [data.traderAddress]);
 
   return (
