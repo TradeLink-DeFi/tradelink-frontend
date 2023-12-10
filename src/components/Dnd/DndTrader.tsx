@@ -376,7 +376,6 @@ const DndTrader = (dndProps: DndProps) => {
       setData(newData);
       setToggleDnd(!toggleDnd);
     } else if (!isMyOffer && newData[1].components) {
-
       const isAlreadyAdd = await newData[1].components.findIndex((item) => {
         if (isTokenItem(item)) {
           return item.tokenAddress == token.tokenAddress;
@@ -401,7 +400,6 @@ const DndTrader = (dndProps: DndProps) => {
       handleFilterNft();
     }
   }, [selectedChain, selectedCollection]);
-
 
   const handleFilterNft = async (choose?: ChooseType) => {
     let myNftsFiltered: NFTItem[] | [];
@@ -649,6 +647,7 @@ const DndTrader = (dndProps: DndProps) => {
   };
 
   const [creating, setCreating] = useState(false);
+  const [accepting, setAccepting] = useState(false);
 
   const router = useRouter();
 
@@ -728,7 +727,6 @@ const DndTrader = (dndProps: DndProps) => {
       data[1]?.components?.length > 0 &&
       data[2]?.components?.length >= dndProps?.offerItems?.length
     ) {
-
       const result = dndProps.offerItems?.map((item) =>
         data[2]?.components.findIndex((my) => {
           if (isNFTFromApi(item) && isNFTItem(my)) {
@@ -739,7 +737,6 @@ const DndTrader = (dndProps: DndProps) => {
         })
       );
 
-
       return !result.includes(-1);
     } else {
       return false;
@@ -747,6 +744,7 @@ const DndTrader = (dndProps: DndProps) => {
   };
 
   const handleAcceptOffer = async () => {
+    setAccepting(true);
     const isMatch = await checkIsMatchOffer();
     if (isMatch) {
       const checkApprove = Promise.all(
@@ -770,13 +768,14 @@ const DndTrader = (dndProps: DndProps) => {
           }
         })
       );
-      checkApprove.then((results) => {
+      checkApprove.then(async (results) => {
         const isHaveFalse = results.includes(false);
         if (!isHaveFalse && dndProps.queryOfferId) {
-          updateOfferStatus(dndProps.queryOfferId, 1);
+          await updateOfferStatus(dndProps.queryOfferId, 1);
         }
       });
     }
+    setAccepting(false);
   };
 
   const MyItemDropableBg = () => (
@@ -1237,7 +1236,7 @@ const DndTrader = (dndProps: DndProps) => {
               Cancel
             </Button>
             <Button
-              // isLoading={creating}
+              isLoading={accepting}
               onClick={handleAcceptOffer}
               className="w-1/12 bg-primary text-white border border-primary disabled:bg-primary-200 disabled:border-primary-200"
             >
