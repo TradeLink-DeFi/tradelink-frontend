@@ -38,7 +38,7 @@ export const useMulticallRead = ({ chainId, encoded }: IUseMulticall) => {
     functionName: "aggregate",
     args: [encoded],
     watch: true,
-  } as unknown as UseContractReadConfig<Abi, "aggregate", unknown>);
+  });
 
   return { data, isError, isLoading, isSuccess, refetch };
 };

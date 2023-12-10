@@ -21,7 +21,8 @@ export const useAllowance = ({
 
   // STEP3: decode data
   const allowance = useMemo(() => {
-    return data && data[1].map((item: string, key: number) =>
+    const res = data as [bigint, string[]]
+    return res && res[1].map((item: string, key: number) =>
       formatEther(allowanceDecoder(item, paramEncoded.isErc20s[key]))
     );
   }, [data, paramEncoded.isErc20s]);
