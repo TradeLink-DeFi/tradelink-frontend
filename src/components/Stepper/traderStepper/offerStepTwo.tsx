@@ -2,7 +2,7 @@ import { useCreateOffer } from "@/hooks/offer.hook";
 import { IOffer } from "@/interfaces/offer.interface";
 import { createOfferEncoder } from "@/services/contract/encoder.service";
 import { truncateString } from "@/utils/formatString.util";
-import { Button } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { parseEther } from "viem";
@@ -24,21 +24,19 @@ const OfferStepTwo = ({ offerData }: PropType) => {
     console.log({ offerData });
     setConfirmLoading(true);
     const createOfferEncoded = createOfferEncoder({
-      tokenIn: offerData.tokenIn.map(
+      tokenIn: offerData.tokenOut.map(
         (token) => token.tokenAddress as `0x${string}`
       ),
-      tokenInAmount: offerData.tokenInAmount.map((token) => parseEther(token)),
-      nftIn: offerData.nftIn.map((nft) => nft.nftAddress as `0x${string}`),
-      nftInId: offerData.nftIn.map((nft) => BigInt(nft.nftId)),
+      tokenInAmount: offerData.tokenOutAmount.map((token) => parseEther(token)),
+      nftIn: offerData.nftOut.map((nft) => nft.nftAddress as `0x${string}`),
+      nftInId: offerData.nftOut.map((nft) => BigInt(nft.nftId)),
       destSelectorOut: BigInt(""),
-      tokenOut: offerData.tokenOut.map(
+      tokenOut: offerData.tokenIn.map(
         (token) => token.tokenAddress as `0x${string}`
       ),
-      tokenOutAmount: offerData.tokenOutAmount.map((token) =>
-        parseEther(token)
-      ),
-      nftOut: offerData.nftOut.map((nft) => nft.nftAddress as `0x${string}`),
-      nftOutId: offerData.nftOut.map((nft) => BigInt(nft.nftId)),
+      tokenOutAmount: offerData.tokenInAmount.map((token) => parseEther(token)),
+      nftOut: offerData.nftIn.map((nft) => nft.nftAddress as `0x${string}`),
+      nftOutId: offerData.nftIn.map((nft) => BigInt(nft.nftId)),
       ownerOfferAddress: address || "0x0",
       traderOfferAddress: offerData.fulfilledAddress
         .walletAddress as `0x${string}`,
@@ -50,18 +48,23 @@ const OfferStepTwo = ({ offerData }: PropType) => {
     createOffer({ args: [createOfferEncoded] });
   };
 
-  const handleUpdateStatus = async (result: { offerId: string }) => {
-    await updateOfferStatus(result.offerId, 2);
-    setConfirmLoading(false);
-    toast.success("Offer confirmed successfully");
-    window.location.reload();
-  };
+
+
+  console.log("res", result);
 
   useEffect(() => {
-    if (result) {
-      handleUpdateStatus(result);
+    const handleUpdateStatus = async (offerId: string) => {
+      console.log({ offerId });
+      updateOfferStatus(offerData._id, 2, offerId).then((_) => {
+        setConfirmLoading(false);
+        toast.success("Offer confirmed successfully");
+        window.location.reload();
+      });
+    };
+    if (result?.offerId) {
+      handleUpdateStatus(result?.offerId);
     }
-  }, [result]);
+  }, [offerData._id, result]);
 
   return (
     <>
@@ -98,8 +101,13 @@ const OfferStepTwo = ({ offerData }: PropType) => {
             <Button
               className="w-1/12 bg-primary text-white border border-primary font-bold"
               onClick={handleClick}
+              isDisabled={isConfirmLoading}
             >
-              Confirm
+              {isConfirmLoading ? (
+                <Spinner color="white" size="sm" />
+              ) : (
+                "Confirm"
+              )}
             </Button>
           </div>
         </div>

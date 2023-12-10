@@ -132,13 +132,6 @@ export const useGetFeeFulfillOffer = ({ chainId }: { chainId?: string }) => {
 export const useCreateOffer = ({ chainId }: { chainId?: string }) => {
   const { chain } = useNetwork();
 
-  console.log(
-    chainId ?? chain?.id.toString() ?? "",
-    contractAddressByChainId(chainId ?? chain?.id.toString() ?? ""),
-    contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")
-      ?.tradelink || ""
-  );
-
   const { data: _data, write } = useContractWrite({
     address:
       contractAddressByChainId(chainId ?? chain?.id.toString() ?? "")

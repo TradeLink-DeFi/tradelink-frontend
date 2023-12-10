@@ -120,10 +120,11 @@ const getOfferById = async (offerId: string) => {
   }
 };
 
-const updateOfferStatus = async (offerId: string, status: number) => {
+const updateOfferStatus = async (offerId: string, status: number, onChainId?: string) => {
   try {
     const { data } = await axios.patch(`/offer/${offerId}`, {
       status: status,
+      onChainId
     });
     return data;
   } catch (error) {

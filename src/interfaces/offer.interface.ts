@@ -92,8 +92,9 @@ export interface IOffer {
   note: string;
   traderAddress: User;
   fulfilledAddress: User;
-  chainA: ChainResponse[];
-  chainB: ChainResponse[];
+  chainA: ChainResponse;
+  chainB: ChainResponse;
   createdAt: Date;
   deadline: Date;
+  onChainId?: string;
 }

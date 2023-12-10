@@ -22,6 +22,8 @@ export default function OfferPost({ data }: OfferPostProps) {
     handleGetEnsName(data.traderAddress[0].walletAddress || "");
   }, [data.traderAddress]);
 
+  console.log(data.tokenOut);
+
   return (
     <div className="flex rounded-lg p-4 space-x-3 bg-white w-full border border-[#EEF0F1]">
       <div>

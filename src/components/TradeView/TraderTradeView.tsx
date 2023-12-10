@@ -16,9 +16,9 @@ export default function TraderTradeView({ step, offerData }: IProps) {
       case 1:
         return <OfferStepTwo offerData={offerData} />;
       case 2:
-        return <OfferStepThree />;
+        return <OfferStepThree offerData={offerData} />;
       case 3:
-        return <OfferStepThree />;
+        return <OfferStepThree offerData={offerData} />;
       case 4:
         return <OfferStepFour />;
       default:

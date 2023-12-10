@@ -1,13 +1,30 @@
-import { Button } from "@nextui-org/react";
+import { useCheckTradeStatus } from "@/hooks/tradeStatuseChecker.hook";
+import { IOffer } from "@/interfaces/offer.interface";
+import { updateOfferStatus } from "@/services/offer.service";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 type PropType = {
-  currentStep: string;
+  offerData: IOffer;
 };
 
-const TradeyStepThreePt2 = () => {
-  const handleClick = () => {
-    console.log("clicked");
-  };
+const TradeyStepThreePt2 = ({ offerData }: PropType) => {
+  const completed = useCheckTradeStatus(
+    offerData.onChainId || "",
+    +offerData.chainA.chainId
+  );
+
+  useEffect(() => {
+    const handleUpdateStatus = async () => {
+      updateOfferStatus(offerData._id, 4).then((_) => {
+        toast.success("Offer confirmed successfully");
+        window.location.reload();
+      });
+    };
+    if (completed) {
+      handleUpdateStatus();
+    }
+  }, [completed, offerData._id]);
 
   return (
     <>

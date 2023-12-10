@@ -15,9 +15,9 @@ export default function TradeeTradeView({ step, offerData }: IProps) {
   const renderStepper = () => {
     switch (step) {
       case 2:
-        return <TradeyStepTwo />;
+        return <TradeyStepTwo offerData={offerData} />;
       case 3:
-        return <TradeyStepThreePt2 />;
+        return <TradeyStepThreePt2 offerData={offerData} />;
       case 4:
         return <TradyStepThree />;
       default:

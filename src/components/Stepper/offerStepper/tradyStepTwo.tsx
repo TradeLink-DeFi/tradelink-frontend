@@ -1,13 +1,60 @@
-import { Button } from "@nextui-org/react";
+import { contractAddressByChainId } from "@/configs/contract.config";
+import { useFulfillOffer } from "@/hooks/offer.hook";
+import { IOffer } from "@/interfaces/offer.interface";
+import { fulfillOfferEncoder } from "@/services/contract/encoder.service";
+import { updateOfferStatus } from "@/services/offer.service";
+import { Button, Spinner } from "@nextui-org/react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 type PropType = {
-  currentStep: string;
+  offerData: IOffer;
 };
 
-const TradeyStepTwo = () => {
+const TradeyStepTwo = ({ offerData }: PropType) => {
+  const { write: fulfillOffer, isSuccess, isLoading, data } = useFulfillOffer({});
+  const [isConfirmLoading, setConfirmLoading] = useState(false);
+
   const handleClick = () => {
-    console.log("clicked");
+    setConfirmLoading(true);
+    console.log({ offerData });
+    const fulfillInfo = fulfillOfferEncoder({
+      offerId: BigInt(offerData?.onChainId || ""),
+      destChainSelector: BigInt(offerData.chainA.chainSelector),
+      destChainAddress: contractAddressByChainId(offerData.chainA.chainId)
+        .tradelink,
+      tokenIn: offerData.tokenIn.map(
+        (token) => token.tokenAddress as `0x${string}`
+      ),
+      tokenInAmount: offerData.tokenInAmount.map((token) => BigInt(token)),
+      nftIn: offerData.nftIn.map((nft) => nft.nftAddress as `0x${string}`),
+      nftInId: offerData.nftIn.map((nft) => BigInt(nft.nftId)),
+      feeAddress: contractAddressByChainId(offerData.chainB.chainId).linkToken,
+      ownerFulfillAddress: offerData.fulfilledAddress
+        .walletAddress as `0x${string}`,
+      traderFulfillAddress: offerData.traderAddress
+        .walletAddress as `0x${string}`,
+      isBridge: offerData.chainA.chainId !== offerData.chainB.chainId,
+      isSuccess: false,
+    });
+    console.log(fulfillInfo);
+    fulfillOffer({ args: [fulfillInfo] });
   };
+
+
+  useEffect(() => {
+    const handleUpdateStatus = async () => {
+      updateOfferStatus(offerData._id, 3).then((_) => {
+        setConfirmLoading(false);
+        toast.success("Offer confirmed successfully");
+        window.location.reload();
+      });
+    };
+    if (isSuccess && !isLoading) {
+      handleUpdateStatus();
+    }
+  }, [isSuccess, isLoading, offerData._id]);
+
 
   return (
     <>
@@ -44,8 +91,13 @@ const TradeyStepTwo = () => {
             <Button
               className="w-1/12 bg-primary text-white border border-primary font-bold"
               onClick={handleClick}
+              isDisabled={isConfirmLoading}
             >
-              Confirm
+              {isConfirmLoading ? (
+                <Spinner color="white" size="sm" />
+              ) : (
+                "Confirm"
+              )}
             </Button>
           </div>
         </div>

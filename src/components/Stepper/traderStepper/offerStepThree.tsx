@@ -1,8 +1,31 @@
+import { useCheckTradeStatus } from "@/hooks/tradeStatuseChecker.hook";
+import { IOffer } from "@/interfaces/offer.interface";
+import { updateOfferStatus } from "@/services/offer.service";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+
 type PropType = {
-  currentStep: string;
+  offerData: IOffer;
 };
 
-const OfferStepThree = () => {
+const OfferStepThree = ({ offerData }: PropType) => {
+  const completed = useCheckTradeStatus(
+    offerData.onChainId || "",
+    +offerData.chainB.chainId
+  );
+
+  useEffect(() => {
+    const handleUpdateStatus = async () => {
+      updateOfferStatus(offerData._id, 4).then((_) => {
+        toast.success("Offer confirmed successfully");
+        window.location.reload();
+      });
+    };
+    if (completed) {
+      handleUpdateStatus();
+    }
+  }, [completed, offerData._id]);
+
   return (
     <>
       {/* 1 */}
