@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
 import { DndContext } from "@/contexts/DndContext";
@@ -25,17 +25,18 @@ import {
 import { Search } from "lucide-react";
 import { ChevronIcon } from "@/constants/ChavronIcon";
 import { OfferCard } from "../NFT/OfferCard";
-import { DndItem, Item, NFTItem, TokenItem } from "@/interfaces/item.interface";
+import { DndItem, NFTItem, TokenItem } from "@/interfaces/item.interface";
 import { TokenCard } from "../NFT/TokenCard";
 import { getChains } from "@/services/chain.service";
 import { getNftCollection } from "@/services/nftCollection.service";
 import * as query from "../../../grqphql/queries";
 import { InitialDnd } from "@/constants/initialDnd";
 import { useQuery } from "@apollo/client";
-import { useQuery as tanStackUseQuery } from "@tanstack/react-query";
-import { useAccount } from "wagmi";
-import { useTokens } from "@/services/token.service";
+import { useAccount, useSwitchNetwork } from "wagmi";
 import { ERC20Modal } from "./ERC20Modal";
+import { getApproved } from "@/services/contract/nft.service";
+import { LoadingModal } from "./LoadingModal";
+import { getAllowance } from "@/services/contract/erc20.service";
 
 enum ChooseType {
   MyItems,
@@ -69,13 +70,18 @@ interface SelectItemProps {
 
 const DndTrader = (dndProps: DndProps) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const {
+    isOpen: isOpenLoading,
+    onOpen: onOpenLoading,
+    onClose: onCloseLoading,
+  } = useDisclosure();
 
   const myElementRef = useRef<HTMLDivElement>(null);
   const account = useAccount();
 
   const [inputValue, setInputValue] = useState<string>("");
   const [chooseType, setChooseType] = useState<ChooseType>(ChooseType.MyItems);
-  const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
+  // const [itemType, setItemType] = useState<ItemType>(ItemType.NFTs);
   const [data, setData] = useState<DndItem[] | []>([]);
   const [offerItem, setOfferItem] =
     useState<Array<NFTItem | TokenItem | null>>(mockupOfferItemData);
@@ -97,6 +103,9 @@ const DndTrader = (dndProps: DndProps) => {
   const [myOfferItems, setMyOfferItems] = useState<Array<NFTItem | TokenItem>>(
     []
   );
+  const [offerWantItems, setOfferWantItems] = useState<
+    Array<NFTItem | TokenItem>
+  >([]);
 
   const [toggleDnd, setToggleDnd] = useState<boolean>(false);
   const [isMyOffer, setIsMyOffer] = useState<boolean>(false);
@@ -179,11 +188,6 @@ const DndTrader = (dndProps: DndProps) => {
   }, [sepoliaNfts, mumbaiNfts, bscNfts, fujiNfts, optimismNfts]);
 
   useEffect(() => {
-    // console.log("1_mySepoliaNfts", mySepoliaNfts);
-    // console.log("2_myMumbaiNfts", myMumbaiNfts);
-    // console.log("3_myBscNfts", myBscNfts);
-    // console.log("4_myFujiNfts", myFujiNfts);
-    // console.log("5_myOptimismNfts", myOptimismNfts);
     if (
       mySepoliaNfts &&
       myMumbaiNfts &&
@@ -210,7 +214,7 @@ const DndTrader = (dndProps: DndProps) => {
         setChainFilterList(chain);
       }
     });
-    getNftCollectionFilterList().then((nftCollection) => {
+    getNftCollectionFilterList(selectedChain).then((nftCollection) => {
       if (nftCollection) {
         setNftCollectioFilterList(nftCollection);
         setSelectedCollection(
@@ -221,11 +225,7 @@ const DndTrader = (dndProps: DndProps) => {
   }, []);
 
   useEffect(() => {
-    if (
-      myNftsFiltered &&
-      myNftsFiltered?.length > 0 &&
-      itemType == ItemType.NFTs
-    ) {
+    if (myNftsFiltered && myNftsFiltered?.length > 0) {
       InitialDnd[0].components = [...myNftsFiltered];
       setData(InitialDnd);
       setToggleDnd(!toggleDnd);
@@ -247,14 +247,16 @@ const DndTrader = (dndProps: DndProps) => {
     if (data) {
       handleDroppableBg();
       const newData = data;
-      if (data[2]?.components) {
+      if (data[2]?.components && myOfferItems?.length > 0) {
         data[2].components = [...myOfferItems];
-        // console.log("newData", newData);
         setData(newData);
-        // setToggleDnd(!toggleDnd);
+      }
+      if (data[1]?.components && offerWantItems?.length > 0) {
+        data[1].components = [...offerWantItems];
+        setData(newData);
       }
     }
-  }, [data, myOfferItems]);
+  }, [data, myOfferItems, offerWantItems]);
 
   const getChainFilterList = async () => {
     const chains = await getChains();
@@ -264,20 +266,36 @@ const DndTrader = (dndProps: DndProps) => {
     }));
   };
 
-  const getNftCollectionFilterList = async () => {
-    const nftCollections = await getNftCollection();
+  const getNftCollectionFilterList = async (chainId: string) => {
+    const nftCollections = await getNftCollection(chainId);
     return nftCollections?.map((nftCollection) => ({
       label: nftCollection.name,
       value: nftCollection._id,
     }));
   };
 
-  const handleChangeItemType = (type: ItemType) => {
-    setItemType(type);
-  };
+  // const handleChangeItemType = (type: ItemType) => {
+  //   setItemType(type);
+  // };
 
-  const handleChangeChain = (chainId: string) => {
+  const { chains, error, isLoading, pendingChainId, switchNetwork } =
+    useSwitchNetwork();
+
+  useEffect(() => {
+    if (selectedChain) {
+      switchNetwork?.(Number(selectedChain) ?? 11155111);
+    }
+  }, [selectedChain]);
+
+  const handleChangeChain = async (chainId: string) => {
     setSelectedChain(chainId);
+    getNftCollectionFilterList(chainId).then((nftCollection) => {
+      if (nftCollection) {
+        setNftCollectioFilterList(nftCollection);
+        setSelectedCollection(nftCollection[0]);
+      }
+    });
+    setMyOfferItems([]);
   };
 
   const handleChangeCollection = async (collectionId: string) => {
@@ -294,21 +312,69 @@ const DndTrader = (dndProps: DndProps) => {
     handleFilterNft(chooseType);
   };
 
-  const handleAddToken = (token: TokenItem, amount: string) => {
-    console.log("handleAddToken", token);
-    console.log("handleAddToken", amount);
-    console.log("isMyOffer", isMyOffer);
+  const handleAddToken = async (token: TokenItem, amount: string) => {
     token.amount = amount;
     const newData = data;
     if (isMyOffer && newData[2].components) {
-      newData[2].components = [...newData[2]?.components, token];
+      const isAlreadyAdd = await newData[2].components.findIndex((item) => {
+        console.log("findIndex item", item);
+        console.log("isTokenItem(item)", isTokenItem(item));
+        if (isTokenItem(item)) {
+          return item.tokenAddress == token.tokenAddress;
+        } else {
+          return false;
+        }
+      });
+
+      console.log("isAlreadyAdd", isAlreadyAdd);
+
+      if (isAlreadyAdd > -1) {
+        console.log("isAlreadyAdd if");
+        newData[2].components[isAlreadyAdd] == token;
+      } else {
+        console.log("isAlreadyAdd else");
+        newData[2].components = [...newData[2]?.components, token];
+        setMyOfferItems([...myOfferItems, token]);
+      }
+
+      onOpenLoading();
+      const isApproved = await getAllowance(
+        token,
+        selectedChain,
+        account?.address as `0x${string}`,
+        amount
+      );
+      onCloseLoading();
+      if (!isApproved) {
+        return;
+      }
+
       setData(newData);
-      setMyOfferItems([...myOfferItems, token]);
       setToggleDnd(!toggleDnd);
-    } else if (newData[1].components) {
-      newData[1].components = [...newData[1]?.components, token];
+    } else if (!isMyOffer && newData[1].components) {
+      console.log("token", token);
+
+      const isAlreadyAdd = await newData[1].components.findIndex((item) => {
+        console.log("findIndex item", item);
+        console.log("isTokenItem(item)", isTokenItem(item));
+        if (isTokenItem(item)) {
+          return item.tokenAddress == token.tokenAddress;
+        } else {
+          return false;
+        }
+      });
+
+      console.log("isAlreadyAdd", isAlreadyAdd);
+
+      if (isAlreadyAdd > -1) {
+        console.log("isAlreadyAdd if");
+        newData[1].components[isAlreadyAdd] == token;
+      } else {
+        console.log("isAlreadyAdd else");
+        newData[1].components = [...newData[1]?.components, token];
+        setOfferWantItems([...offerWantItems, token]);
+      }
       setData(newData);
-      setMyOfferItems([...myOfferItems, token]);
       setToggleDnd(!toggleDnd);
     }
   };
@@ -318,6 +384,7 @@ const DndTrader = (dndProps: DndProps) => {
       handleFilterNft();
       // handleFilterToken();
     }
+    console.log("selectedCollection", selectedCollection);
   }, [selectedChain, selectedCollection]);
 
   // useEffect(() => {
@@ -436,7 +503,19 @@ const DndTrader = (dndProps: DndProps) => {
               offerItem.id == item.id
           )
       );
-      console.log("##result ::x ", result);
+      myNftsFiltered = result;
+    }
+    if (offerWantItems?.length > 0) {
+      console.log("##myOfferItems ss", offerWantItems);
+      const result = myNftsFiltered?.filter(
+        (item) =>
+          !offerWantItems.some(
+            (offerItem) =>
+              isNFTItem(offerItem) &&
+              offerItem.__typename == item.__typename &&
+              offerItem.id == item.id
+          )
+      );
       myNftsFiltered = result;
     }
     console.log("##myNftsFiltered ::x ", myNftsFiltered);
@@ -461,7 +540,12 @@ const DndTrader = (dndProps: DndProps) => {
   //   }
   // };
 
-  const onDragEnd = (result: DropResult) => {
+  // const { data: allowanceData } = useCheckAllowance(
+  //   "0",
+  //   selectedCollection?.label!
+  // );
+
+  const onDragEnd = async (result: DropResult) => {
     const { source, destination } = result;
     if (!destination) return;
     // # drag to other droppable
@@ -477,11 +561,31 @@ const DndTrader = (dndProps: DndProps) => {
         source.index,
         1
       );
+
+      if (
+        source.droppableId == "droppable-0" &&
+        destination.droppableId == "droppable-2"
+      ) {
+        onOpenLoading();
+        const isApproved = await getApproved(
+          item?.tokenId,
+          selectedCollection?.label!,
+          selectedChain
+        );
+        console.log("isApproved", isApproved);
+        onCloseLoading();
+        if (!isApproved) {
+          return;
+        }
+      }
+
       newData[newDroppableIndex].components.splice(destination.index, 0, item);
       setData([...newData]);
 
       if (destination.droppableId == "droppable-2") {
         setMyOfferItems([...myOfferItems, item]);
+      } else if (destination.droppableId == "droppable-1") {
+        setOfferWantItems([...offerWantItems, item]);
       }
     } else {
       // # drag in same droppable
@@ -500,7 +604,7 @@ const DndTrader = (dndProps: DndProps) => {
   }
 
   function isTokenItem(item: any): item is TokenItem {
-    return item && typeof item.__typename === "string";
+    return item && typeof item.tokenAddress === "string";
   }
 
   const handleDroppableBg = () => {
@@ -528,7 +632,7 @@ const DndTrader = (dndProps: DndProps) => {
               return offer.tokenAddress === item.tokenAddress;
             }
           }
-          return false; // Return false for other cases or when offer is falsy
+          return false;
         });
         if (offerItemIndex !== -1) {
           result[index] = offerArray[offerItemIndex];
@@ -552,6 +656,14 @@ const DndTrader = (dndProps: DndProps) => {
     }
     const inputValueLimited = event.target.value.slice(0, MAX_LENGTH);
     setInputValue(inputValueLimited);
+  };
+
+  const handleCreateOffer = () => {
+    if (data[1]?.components?.length > 0 && data[1]?.components?.length > 0) {
+      console.log("have item");
+    } else {
+      console.log("dont have item");
+    }
   };
 
   const MyItemDropableBg = () => (
@@ -725,6 +837,7 @@ const DndTrader = (dndProps: DndProps) => {
                     size="sm"
                     placeholder="Select Collection NFT"
                     defaultSelectedKeys={["65716f0d31a5f409f8fbdc54"]}
+                    selectedKeys={[selectedCollection?.value!]}
                     disallowEmptySelection
                     variant="bordered"
                     classNames={{
@@ -916,7 +1029,7 @@ const DndTrader = (dndProps: DndProps) => {
                                       : component._id.toString()
                                   }
                                   index={index}
-                                  // isDragDisabled={true}
+                                  isDragDisabled={true}
                                 >
                                   {(provided) => (
                                     <div
@@ -1006,7 +1119,10 @@ const DndTrader = (dndProps: DndProps) => {
               <Button className="w-1/12 bg-white text-primary border border-primary">
                 Cancel
               </Button>
-              <Button className="w-1/12 bg-primary text-white border border-primary">
+              <Button
+                onClick={handleCreateOffer}
+                className="w-1/12 bg-primary text-white border border-primary"
+              >
                 Create
               </Button>
             </div>
@@ -1019,6 +1135,12 @@ const DndTrader = (dndProps: DndProps) => {
         onOpenChange={onOpenChange}
         selectedChain={selectedChain}
         handleAddToken={handleAddToken}
+      />
+      <LoadingModal
+        isOpen={isOpenLoading}
+        onOpen={onOpenLoading}
+        onClose={onCloseLoading}
+        message={"Checking approval ... "}
       />
     </>
   ) : (

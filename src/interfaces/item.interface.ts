@@ -23,7 +23,7 @@ export interface TokenItem {
   isActive: boolean;
   name: string;
   symbol: string;
-  tokenAddress: string;
+  tokenAddress: `0x${string}`;
   type: string;
   __v: number;
   _id: string;
