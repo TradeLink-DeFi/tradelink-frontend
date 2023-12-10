@@ -8,7 +8,7 @@ import { useRouter } from "next/router";
 import TradeView from "@/components/TradeView/TradeView";
 import { useEffect, useState } from "react";
 import { NFTItem, TokenItem } from "@/interfaces/item.interface";
-
+import { useAccount, useSwitchNetwork } from "wagmi";
 export default function TradeById() {
   const router = useRouter();
 
@@ -17,8 +17,9 @@ export default function TradeById() {
   const [allOfferItems, setAllOfferItems] = useState<(TokenItem | NFTItem)[]>();
   const [allWantItems, setAllWantItems] = useState<(TokenItem | NFTItem)[]>();
 
-  const { data: offerData } = useQuery(["offerById", offerId], async () =>
-    getOfferById(offerId)
+  const { data: offerData, isLoading } = useQuery(
+    ["offerById", offerId],
+    async () => getOfferById(offerId)
   );
 
   useEffect(() => {
@@ -43,10 +44,61 @@ export default function TradeById() {
       setAllWantItems(wantItem);
     }
   }, [offerData]);
+  const account = useAccount();
+  if (isLoading) return <div>Loading...</div>;
+
+  // console.log("offerData", offerData);
+
+  const { traderAddress, status } = offerData || {
+    traderAddress: { walletAddress: "" },
+    status: "0",
+  };
+
+  const ownerAddress = account?.address?.toLocaleLowerCase();
+
+  const renderTrade = () => {
+    console.log({ status, traderAddress, ownerAddress });
+
+    if (status === 0 && traderAddress.walletAddress !== ownerAddress) {
+      if (offerData && allOfferItems) {
+        return (
+          <DndTrader
+            isCreateOffer={false}
+            offerItems={allOfferItems}
+            wantItems={allWantItems}
+          ></DndTrader>
+        );
+      }
+    }
+
+    if (traderAddress.walletAddress === ownerAddress) {
+      return (
+        <TradeView
+          offerItems={allWantItems}
+          wantItems={allOfferItems}
+          note={offerData?.node}
+          isTrader={true}
+          step={status}
+        />
+      );
+    }
+
+    if (offerData?.fullFillAddress === ownerAddress) {
+      return (
+        <TradeView
+          offerItems={allWantItems}
+          wantItems={allOfferItems}
+          note={offerData?.node}
+          isTrader={false}
+          step={status}
+        />
+      );
+    }
+  };
 
   return (
     <MainLayout>
-      {/* <Head>
+      <Head>
         <title>TradeLink | Trade</title>
         <meta
           name="viewport"
@@ -58,20 +110,7 @@ export default function TradeById() {
           Trade Offer #{router.query.id}
         </p>
       </div>
-
-      {(offerData && allOfferItems) && (
-        <DndTrader
-          isCreateOffer={false}
-          offerItems={allOfferItems}
-          wantItems={allWantItems}
-        ></DndTrader>
-      )} */}
-
-      <TradeView
-        offerItems={allWantItems}
-        wantItems={allOfferItems}
-        note={offerData?.node}
-      />
+      {renderTrade()}
     </MainLayout>
   );
 }

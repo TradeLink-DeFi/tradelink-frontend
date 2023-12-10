@@ -4,18 +4,21 @@ import TradeeTradeView from "./TradeeTradeView";
 import { ShowTradeOffer } from "../TradeOffer/ShowTrade";
 import { NFTItem, TokenItem } from "@/interfaces/item.interface";
 
-export default function TradeView({
-  offerItems,
-  wantItems,
-  note,
-}: {
+interface IProps {
+  isTrader: boolean;
+  step: number;
   offerItems?: (TokenItem | NFTItem)[];
   wantItems?: (TokenItem | NFTItem)[];
   note?: string;
-}) {
-  const isTrader = true;
-  const step = 1;
+}
 
+export default function TradeView({
+  isTrader,
+  step,
+  offerItems,
+  wantItems,
+  note,
+}: IProps) {
   return (
     <>
       <div className="flex w-full space-x-5 pt-5">

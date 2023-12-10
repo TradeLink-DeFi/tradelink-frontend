@@ -1,19 +1,10 @@
-import { truncateString } from "@/utils/formatString.util";
 import { Button } from "@nextui-org/react";
-import { useState } from "react";
-
-useState;
 
 type PropType = {
   currentStep: string;
 };
 
-const OfferStepTwo = () => {
-  const [trady, setTrady] = useState(
-    "0xF72f6bE11bAE516a3Fa16B19c9d7988f4C1CDA42"
-  );
-  const tradyAddress = truncateString(trady);
-
+const TradeyStepThreePt2 = () => {
   const handleClick = () => {
     console.log("clicked");
   };
@@ -30,7 +21,9 @@ const OfferStepTwo = () => {
         </div>
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px] mt-2">
           <div className="text-sm font-semibold">Offer Accepted</div>
-          <div className="mt-2 text-sm">This trade has been accepted.</div>
+          <div className="mt-2 text-sm">
+            Trade offer has already been accepted.
+          </div>
         </div>
       </div>
 
@@ -42,43 +35,19 @@ const OfferStepTwo = () => {
           </div>
           <div className="w-[3px] h-[100px] bg-[#CCD1D5] flex justify-center items-center rounded-md" />
         </div>
-        <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[170px]">
-          <div className="text-sm font-semibold">Pending</div>
+        <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[130px]">
+          <div className="text-sm font-semibold">Wating</div>
           <div className="mt-2 text-sm">
-            Wallet: <span className="font-bold">{tradyAddress}</span> has traded
-            your offer.
-          </div>
-          <div className="text-sm">{"Select 'Confirm' to continue."}</div>
-          <div className="mt-3">
-            <Button
-              className="w-1/12 bg-primary text-white border border-primary font-bold"
-              onClick={handleClick}
-            >
-              Confirm
-            </Button>
+            Waiting for the transaction to be successful.
           </div>
         </div>
       </div>
 
       {/* 3 */}
-      <div className=" flex gap-5 px-6 pt-2 ">
-        <div className="flex flex-col justify-center items-center gap-1">
-          <div className="bg-[#CCD1D5] w-11 h-11  rounded-full text-white flex justify-center items-center">
-            3
-          </div>
-          <div className="w-[3px] h-[100px] bg-[#CCD1D5] flex justify-center items-center rounded-md" />
-        </div>
-
-        <div className="flex flex-col rounded-md p-4 w-[500px]  h-[100px]">
-          <div className="text-sm font-semibold text-[#CCD1D5]">Waiting</div>
-        </div>
-      </div>
-
-      {/* 4 */}
       <div className="flex gap-5 px-6 pt-2">
         <div className="flex flex-col justify-center items-center gap-1">
           <div className="bg-[#CCD1D5] w-11 h-11  rounded-full text-white flex justify-center items-center">
-            4
+            3
           </div>
         </div>
         <div className="flex flex-col">
@@ -91,4 +60,4 @@ const OfferStepTwo = () => {
   );
 };
 
-export default OfferStepTwo;
+export default TradeyStepThreePt2;

@@ -22,9 +22,8 @@ const OfferStepOne = () => {
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px] mt-2">
           <div className="text-sm font-semibold">Waiting</div>
           <div className="mt-2 text-sm">
-            Please wait for people to trade your offer and press
+            Waiting for othes to accept the offer.
           </div>
-          <div className="text-sm">Accept.</div>
         </div>
       </div>
 
