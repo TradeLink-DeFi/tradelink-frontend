@@ -2,11 +2,16 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
-import { bkcTestnet } from "@/constants/bkcTestnet";
-import { goerli, sepolia, polygonMumbai } from "wagmi/chains";
+import {
+  sepolia,
+  polygonMumbai,
+  avalancheFuji,
+  bscTestnet,
+  optimismGoerli,
+} from "wagmi/chains";
 
 const { chains, publicClient } = configureChains(
-  [goerli, sepolia, polygonMumbai],
+  [sepolia, polygonMumbai, avalancheFuji, bscTestnet, optimismGoerli],
   [publicProvider()]
 );
 

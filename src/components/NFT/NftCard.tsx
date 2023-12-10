@@ -44,6 +44,8 @@ export const NftCard = ({
     }
   }, [nftItem?.contentURI]);
 
+  console.log("chain", chain);
+
   return (
     <div className="rounded-lg">
       <div
@@ -60,7 +62,10 @@ export const NftCard = ({
           draggable={false}
         />
         <Avatar
-          className="absolute z-20 top-2 left-2 w-[15px] h-[15px] opacity-80"
+          className={cn(
+            "absolute z-20 top-2 left-2 w-[15px] h-[15px] opacity-80",
+            isMicro && "top-1 left-1 w-[10px] h-[10px]"
+          )}
           src={chainPathMapping(chain || -1)}
         />
         {isHovered && (

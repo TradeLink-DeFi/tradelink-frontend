@@ -48,7 +48,10 @@ export const ApolloProviders = ({
           ApolloLink.split(
             (operation) => operation.getContext().clientName === "fuji",
             fujiGraph,
-            optimismGraph
+            ApolloLink.split(
+              (operation) => operation.getContext().clientName === "optimism",
+              optimismGraph
+            )
           )
         )
       )
