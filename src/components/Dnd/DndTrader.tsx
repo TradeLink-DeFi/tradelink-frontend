@@ -51,6 +51,7 @@ import {
 } from "@/services/offer.service";
 import { NFTMapper } from "@/constants/nftMapper";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 enum ChooseType {
   MyItems,
@@ -709,10 +710,12 @@ const DndTrader = (dndProps: DndProps) => {
         chainB: "65702b22014714803a8dd799",
       })
         .then((res: any) => {
+          toast.success("Trade offer created successfully!");
           setCreating(false);
           router.push(`/trade/${res._id}`);
         })
         .catch((err) => {
+          toast.error("Something went wrong !");
           setCreating(false);
         });
     } else {
@@ -745,7 +748,9 @@ const DndTrader = (dndProps: DndProps) => {
 
   const handleAcceptOffer = async () => {
     setAccepting(true);
-    const isMatch = await checkIsMatchOffer();
+    const isMatch = await checkIsMatchOffer().catch((err) => {
+      toast.error("Something went wrong !");
+    });
     if (isMatch) {
       const checkApprove = Promise.all(
         data[2]?.components.map(async (item) => {
@@ -769,12 +774,16 @@ const DndTrader = (dndProps: DndProps) => {
         })
       );
       checkApprove.then(async (results) => {
+        console.log(results, router.query.id);
         const isHaveFalse = results.includes(false);
-        if (!isHaveFalse && dndProps.queryOfferId) {
-          await updateOfferStatus(dndProps.queryOfferId, 1);
+        if (!isHaveFalse && router.query.id) {
+          await updateOfferStatus(router.query.id as string, 1);
+          window.location.reload();
+          toast.success("Trade offer created successfully!");
         }
       });
     }
+
     setAccepting(false);
   };
 
