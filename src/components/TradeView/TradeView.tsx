@@ -2,10 +2,12 @@ import React from "react";
 import TraderTradeView from "./TraderTradeView";
 import TradeeTradeView from "./TradeeTradeView";
 
-export default function TradeView() {
-  const isTrader = true;
-  const step = 1;
+interface IProps {
+  isTrader: boolean;
+  step: number;
+}
 
+export default function TradeView({ isTrader, step }: IProps) {
   return (
     <>
       <div className="flex w-full space-x-5 pt-5">

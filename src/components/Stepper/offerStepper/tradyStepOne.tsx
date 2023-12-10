@@ -18,7 +18,7 @@ const TradeyStepOne = () => {
         <div className="flex flex-col bg-[#F1F5FD] rounded-md p-4 w-[500px] h-[100px] mt-2">
           <div className="text-sm font-semibold">Waiting</div>
           <div className="mt-2 text-sm">
-            Send a trade request to the offer owner.
+            Waiting for owner to accept the offer.
           </div>
         </div>
       </div>
