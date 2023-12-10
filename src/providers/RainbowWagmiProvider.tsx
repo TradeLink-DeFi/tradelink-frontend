@@ -3,8 +3,8 @@ import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 import {
-  sepolia,
   polygonMumbai,
+  sepolia,
   avalancheFuji,
   bscTestnet,
   optimismGoerli,
