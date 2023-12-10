@@ -5,15 +5,14 @@ import { Image } from "@nextui-org/react";
 import { getOfferById } from "@/services/offer.service";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import TradeView from "@/components/TradeView/TradeView";
 import { useEffect, useState } from "react";
 import { NFTItem, TokenItem } from "@/interfaces/item.interface";
 
 export default function TradeById() {
   const router = useRouter();
-  const offerId =
-    router.asPath.split("/trade/")[1] != "[id]"
-      ? router.asPath.split("/trade/")[1]
-      : "";
+
+  const offerId: string = String(router.query.id);
 
   const [allOfferItems, setAllOfferItems] = useState<(TokenItem | NFTItem)[]>();
   const [allWantItems, setAllWantItems] = useState<(TokenItem | NFTItem)[]>();
@@ -55,7 +54,9 @@ export default function TradeById() {
         />
       </Head>
       <div className="w-full">
-        <p className="text-xl font-semibold text-left">Trade Offer</p>
+        <p className="text-xl font-semibold text-left">
+          Trade Offer #{router.query.id}
+        </p>
       </div>
 
       {offerData && allOfferItems && (
@@ -65,6 +66,8 @@ export default function TradeById() {
           wantItems={allWantItems}
         ></DndTrader>
       )}
+
+      {/* <TradeView /> */}
     </MainLayout>
   );
 }
