@@ -64,6 +64,7 @@ export default function TradeById() {
           isCreateOffer={false}
           offerItems={allOfferItems}
           wantItems={allWantItems}
+          queryOfferId={offerId}
         ></DndTrader>
       )}
 

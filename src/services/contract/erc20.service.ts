@@ -4,6 +4,36 @@ import { writeContract, readContract } from "@wagmi/core";
 import { TokenItem } from "@/interfaces/item.interface";
 import { parseEther } from "viem";
 
+export const getIsAllowance = async (
+  token: TokenItem,
+  chainId: string,
+  address: `0x${string}`,
+  amount: string
+) => {
+  const allAddress = contractAddressByChainId(chainId ?? "");
+  const tradelinkContract = allAddress["tradelink"];
+  const contractAddress: `0x${string}` = token.tokenAddress;
+
+  const paresAmount = parseEther(amount);
+
+  return await readContract({
+    address: contractAddress,
+    abi: erc20ABI,
+    functionName: "allowance",
+    args: [address, tradelinkContract],
+  })
+    .then(async (allowance: bigint) => {
+      if (allowance < paresAmount) {
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .catch((error) => {
+      return false;
+    });
+};
+
 export const getAllowance = async (
   token: TokenItem,
   chainId: string,
@@ -14,11 +44,7 @@ export const getAllowance = async (
   const tradelinkContract = allAddress["tradelink"];
   const contractAddress: `0x${string}` = token.tokenAddress;
 
-  console.log("allAddress", allAddress);
-  console.log("tradelinkContract", tradelinkContract);
-
   const paresAmount = parseEther(amount);
-  console.log("paresAmount ", paresAmount);
 
   return await readContract({
     address: contractAddress,
