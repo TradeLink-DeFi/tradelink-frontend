@@ -111,4 +111,19 @@ const mapHistroyByDateGroup = async (isTrader?: boolean) => {
   return offerGroupping;
 };
 
-export { createOffer, getOffers, getHistory, mapHistroyByDateGroup };
+const getOfferById = async (offerId: string) => {
+  try {
+    const { data } = await axios.get(`/offer/find/${offerId}`);
+    return data;
+  } catch (error) {
+    console.log("getOfferById error ", error);
+  }
+};
+
+export {
+  createOffer,
+  getOffers,
+  getHistory,
+  mapHistroyByDateGroup,
+  getOfferById,
+};

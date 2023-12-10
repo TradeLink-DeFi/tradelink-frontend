@@ -33,3 +33,20 @@ export const getChainIdByCollection = (typename: string) => {
       return "/";
   }
 };
+
+export const getChainByChainDBId = (_id: string) => {
+  switch (_id) {
+    case "65702b22014714803a8dd799":
+      return "80001";
+    case "65702ab5014714803a8dd795":
+      return "11155111";
+    case "65702af6014714803a8dd797":
+      return "420";
+    case "65702b43014714803a8dd79b":
+      return "43113";
+    case "65702b66014714803a8dd79d":
+      return "97";
+    default:
+      return "/";
+  }
+};
