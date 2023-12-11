@@ -35,6 +35,18 @@ export const ApolloProviders = ({
     uri: "https://api.thegraph.com/subgraphs/name/supanut1911/tradelink-nft-optimism-goerli",
   });
 
+  const tradeStatusCheckerSepolia = new HttpLink({
+    uri: "https://api.studio.thegraph.com/query/59650/v2tradelink-trade-statue-cker/sepolia",
+  });
+
+  const tradeStatusCheckerMumbai = new HttpLink({
+    uri: "https://api.studio.thegraph.com/query/59650/v2tradelink-trade-statue-cker/mumbai",
+  });
+
+  const tradeStatusCheckerFuji = new HttpLink({
+    uri: "https://api.studio.thegraph.com/query/59650/v2tradelink-trade-statue-cker/fuji",
+  });
+
   const client = new ApolloClient({
     link: ApolloLink.split(
       (operation) => operation.getContext().clientName === "sepolia",
@@ -48,7 +60,25 @@ export const ApolloProviders = ({
           ApolloLink.split(
             (operation) => operation.getContext().clientName === "fuji",
             fujiGraph,
-            optimismGraph
+            ApolloLink.split(
+              (operation) => operation.getContext().clientName === "optimism",
+              optimismGraph,
+              ApolloLink.split(
+                (operation) =>
+                  operation.getContext().clientName === "statusChekcerSepolia",
+                tradeStatusCheckerSepolia,
+                ApolloLink.split(
+                  (operation) =>
+                    operation.getContext().clientName === "statusChekcerMumbai",
+                  tradeStatusCheckerMumbai,
+                  ApolloLink.split(
+                    (operation) =>
+                      operation.getContext().clientName === "statusChekcerFuji",
+                    tradeStatusCheckerFuji
+                  )
+                )
+              )
+            )
           )
         )
       )

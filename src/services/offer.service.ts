@@ -1,4 +1,8 @@
-import { GroupedOfferHistory, OfferResponse, OfferStatus } from "@/interfaces/offer.interface";
+import {
+  GroupedOfferHistory,
+  OfferResponse,
+  OfferStatus,
+} from "@/interfaces/offer.interface";
 import axios from "axios";
 
 interface GetOffersProps {
@@ -7,6 +11,36 @@ interface GetOffersProps {
   search?: string;
   status?: OfferStatus;
 }
+
+export interface INftItem {
+  nftId: string;
+  nftAddress: string;
+  name: string;
+  imageUrl: string;
+  nftCollection: string;
+}
+
+interface ICreateOffer {
+  tokenIn: string[] | [];
+  tokenOut: string[] | [];
+  tokenInAmount: string[];
+  tokenOutAmount: string[];
+  nftIn: INftItem[] | [];
+  nftOut: INftItem[] | [];
+  traderAddress: string;
+  note: string;
+  chainA: string;
+  chainB: string;
+}
+
+const createOffer = async (offer: ICreateOffer) => {
+  try {
+    const { data } = await axios.post("/offer", offer);
+    return data;
+  } catch (error) {
+    console.log("error", error);
+  }
+};
 
 const getOffers = async (query: GetOffersProps) => {
   const key = Object.keys(query) as (keyof GetOffersProps)[];
@@ -33,7 +67,9 @@ const getOffers = async (query: GetOffersProps) => {
 // filterByUser
 const getHistory = async (isTrader?: boolean) => {
   try {
-    const { data } = await axios.get<OfferResponse[]>(isTrader ? `/offer/history?isTrader=true` : "/offer/history");
+    const { data } = await axios.get<OfferResponse[]>(
+      isTrader ? `/offer/history?isTrader=true` : "/offer/history"
+    );
     return data;
   } catch (err) {
     console.log("error", err);
@@ -42,34 +78,65 @@ const getHistory = async (isTrader?: boolean) => {
 
 const mapHistroyByDateGroup = async (isTrader?: boolean) => {
   const offer = await getHistory(isTrader);
-  const offerGroupping = offer?.reduce((acc: GroupedOfferHistory[], item: any) => {
-    const dateKey: string = new Date(item.createdAt).toLocaleDateString();
-    const existingDateIndex: number = acc.findIndex(
-      (group) => group.date === dateKey
-    );
+  const offerGroupping = offer?.reduce(
+    (acc: GroupedOfferHistory[], item: any) => {
+      const dateKey: string = new Date(item.createdAt).toLocaleDateString();
+      const existingDateIndex: number = acc.findIndex(
+        (group) => group.date === dateKey
+      );
 
-    if (existingDateIndex !== -1) {
-      acc[existingDateIndex].offers.push({
-        _id: item._id,
-        createdAt: new Date(item.createdAt),
-        status: item.status,
-      });
-    } else {
-      acc.push({
-        date: dateKey,
-        offers: [
-          {
-            _id: item._id,
-            createdAt: new Date(item.createdAt),
-            status: item.status,
-          },
-        ],
-      });
-    }
+      if (existingDateIndex !== -1) {
+        acc[existingDateIndex].offers.push({
+          _id: item._id,
+          createdAt: new Date(item.createdAt),
+          status: item.status,
+        });
+      } else {
+        acc.push({
+          date: dateKey,
+          offers: [
+            {
+              _id: item._id,
+              createdAt: new Date(item.createdAt),
+              status: item.status,
+            },
+          ],
+        });
+      }
 
-    return acc;
-  }, []);
+      return acc;
+    },
+    []
+  );
   return offerGroupping;
 };
 
-export { getOffers, getHistory, mapHistroyByDateGroup };
+const getOfferById = async (offerId: string) => {
+  try {
+    const { data } = await axios.get(`/offer/find/${offerId}`);
+    return data;
+  } catch (error) {
+    console.log("getOfferById error ", error);
+  }
+};
+
+const updateOfferStatus = async (offerId: string, status: number, onChainId?: string) => {
+  try {
+    const { data } = await axios.patch(`/offer/${offerId}`, {
+      status: status,
+      onChainId
+    });
+    return data;
+  } catch (error) {
+    console.log("updateOfferStatus error ", error);
+  }
+};
+
+export {
+  createOffer,
+  getOffers,
+  getHistory,
+  mapHistroyByDateGroup,
+  getOfferById,
+  updateOfferStatus,
+};

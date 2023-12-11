@@ -1,15 +1,29 @@
-import { truncateString } from "@/utils/formatString.util";
 import { Button, Image } from "@nextui-org/react";
 import { OfferResponse } from "@/interfaces/offer.interface";
 import { convertTZ, diffDateMin } from "@/utils/date.util";
 import { NftCard } from "../NFT/NftCard";
 import { TokenCard } from "../NFT/TokenCard";
-
+import { getEnsName } from "@/utils/ensname.util";
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/router";
 interface OfferPostProps {
   data: OfferResponse;
 }
 
 export default function OfferPost({ data }: OfferPostProps) {
+  const [ensName, setEnsName] = useState("");
+  const router = useRouter();
+
+  const handleGetEnsName = async (address: string) => {
+    setEnsName(await getEnsName(address));
+  };
+
+  useEffect(() => {
+    handleGetEnsName(data.traderAddress[0].walletAddress || "");
+  }, [data.traderAddress]);
+
+  console.log(data.tokenOut);
+
   return (
     <div className="flex rounded-lg p-4 space-x-3 bg-white w-full border border-[#EEF0F1]">
       <div>
@@ -17,9 +31,7 @@ export default function OfferPost({ data }: OfferPostProps) {
       </div>
       <div className="space-y-3 w-full">
         <div className="flex space-x-2 items-center my-1">
-          <div className="font-semibold text-[#313235]">
-            {truncateString(data.traderAddress[0].walletAddress)}
-          </div>
+          <div className="font-semibold text-[#313235]">{ensName}</div>
           <Image src="/offers/verify.png" width={16} alt="Verify Badge" />
           <p className="text-sm font-light">
             {diffDateMin(convertTZ(data.createdAt))} min ago
@@ -31,7 +43,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             <Image src="/offers/IHave.png" width={16} alt="IHave Badge" />
             <p className="text-[#313235] text-base font-semibold">I want</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 items-center">
             {data.nftIn.map((nft, key) => (
               <NftCard
                 key={key}
@@ -44,11 +56,12 @@ export default function OfferPost({ data }: OfferPostProps) {
               />
             ))}
             {data.tokenIn.map((token, key) => (
+              <div key={key} className="w-20">
               <TokenCard
-                key={key}
-                itemCache={{ ...token, amount: data.tokenInAmount[key]}}
+                itemCache={{ ...token, amount: data.tokenInAmount[key] }}
                 chain={data.chainTokenIn[key].chainId}
               />
+              </div>
             ))}
           </div>
           <hr className="w-full" />
@@ -72,7 +85,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             {data.tokenOut.map((token, key) => (
               <TokenCard
                 key={key}
-                itemCache={{ ...token, amount: data.tokenOutAmount[key]}}
+                itemCache={{ ...token, amount: data.tokenOutAmount[key] }}
                 chain={data.chainTokenOut[key].chainId}
               />
             ))}
@@ -84,6 +97,7 @@ export default function OfferPost({ data }: OfferPostProps) {
             startContent={<Image src="/icons/trade.svg" alt="trade" />}
             color="primary"
             className="px-6"
+            onClick={() => router.push(`/trade/${data._id}`)}
           >
             Trade
           </Button>

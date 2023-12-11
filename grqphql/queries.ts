@@ -98,7 +98,7 @@ export const GET_FUJI = gql`
 export const GET_FUJI_BY_ADDRESS = gql`
   query MyFuji($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      golem8BitNfts {
+      golem8bitNft {
         tokenId
         id
         contentURI
@@ -122,12 +122,63 @@ export const GET_OPTIMISM = gql`
 export const GET_OPTIMISM_BY_ADDRESS = gql`
   query MyOptimism($walletAddress: String!) {
     users(where: { id: $walletAddress }) {
-      koiCrapNfts {
+      koiCrapNft {
         tokenId
         id
         contentURI
         createdAtTimestamp
       }
+    }
+  }
+`;
+
+export const GET_TRADE_STATUS_SEPOLIA_BY_OFFER_ID = gql`
+  query MyTradeStatus($offerId: String!) {
+    successes(where: { offerId: $offerId }) {
+      blockNumber
+      blockTimestamp
+      destChain
+      fulfillId
+      id
+      offerId
+      sourceChain
+      transactionHash
+      userFulfill
+      userOffer
+    }
+  }
+`;
+
+export const GET_TRADE_STATUS_MUMBAI_BY_OFFER_ID = gql`
+  query MyTradeStatus($offerId: String!) {
+    successes(where: { offerId: $offerId }) {
+      blockNumber
+      blockTimestamp
+      destChain
+      fulfillId
+      id
+      offerId
+      sourceChain
+      transactionHash
+      userFulfill
+      userOffer
+    }
+  }
+`;
+
+export const GET_TRADE_STATUS_FUJI_BY_OFFER_ID = gql`
+  query MyTradeStatus($offerId: String!) {
+    successes(where: { offerId: $offerId }) {
+      blockNumber
+      blockTimestamp
+      destChain
+      fulfillId
+      id
+      offerId
+      sourceChain
+      transactionHash
+      userFulfill
+      userOffer
     }
   }
 `;

@@ -77,3 +77,24 @@ export interface OfferResponse {
   createdAt: Date;
   deadline: Date;
 }
+
+export interface IOffer {
+  _id: string;
+  tokenIn: IToken[];
+  tokenOut: IToken[];
+  tokenInAmount: string[];
+  tokenOutAmount: string[];
+  nftIn: Nft[];
+  nftOut: Nft[];
+  chainTokenIn: ChainToken[];
+  chainTokenOut: ChainToken[];
+  status: OfferStatus;
+  note: string;
+  traderAddress: User;
+  fulfilledAddress: User;
+  chainA: ChainResponse;
+  chainB: ChainResponse;
+  createdAt: Date;
+  deadline: Date;
+  onChainId?: string;
+}

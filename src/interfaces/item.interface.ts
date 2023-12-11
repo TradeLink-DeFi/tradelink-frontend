@@ -18,9 +18,30 @@ export interface NFTItem {
   __typename: string;
 }
 
+export interface NFTFromAPI {
+  imageUrl: string;
+  name: string;
+  nftAddress: string;
+  nftCollection: string;
+  nftId: string;
+}
+
+export interface TokenItem {
+  decimals: number;
+  isActive: boolean;
+  name: string;
+  symbol: string;
+  tokenAddress: `0x${string}`;
+  type: string;
+  __v: number;
+  _id: string;
+  amount?: string;
+  chain?: string;
+}
+
 export interface DndItem {
   id: number;
   title: string;
   icon: string | undefined;
-  components: NFTItem[] | [];
+  components: (NFTItem | TokenItem)[] | [];
 }
