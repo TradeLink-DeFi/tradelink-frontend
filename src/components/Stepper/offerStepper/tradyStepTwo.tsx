@@ -29,7 +29,7 @@ const TradeyStepTwo = ({ offerData }: PropType) => {
       tokenInAmount: offerData.tokenInAmount.map((token) => BigInt(token)),
       nftIn: offerData.nftIn.map((nft) => nft.nftAddress as `0x${string}`),
       nftInId: offerData.nftIn.map((nft) => BigInt(nft.nftId)),
-      feeAddress: contractAddressByChainId(offerData.chainB.chainId).linkToken,
+      feeAddress: "0x0000000000000000000000000000000000000000",
       ownerFulfillAddress: offerData.fulfilledAddress
         .walletAddress as `0x${string}`,
       traderFulfillAddress: offerData.traderAddress
